@@ -1,0 +1,14 @@
+Frontend
+React
+npm start
+
+
+Backend
+NodeJS
+Package "Express"
+npm init -y 	-	init project
+npm install express - install the express package
+Start server: node src/server.js
+postman is used to test the server
+npm install nodemon --save-dev: extension that will restart server automatically when changes are made - only for development
+Run server using: npx nodemon src/server.js
