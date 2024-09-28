@@ -13,6 +13,9 @@ my-blog/coverage
 # production
 my-blog/build
 
+# production
+my-blog-backend/credentials.json
+
 # misc
 .DS_Store
 .env.local
