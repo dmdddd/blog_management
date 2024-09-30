@@ -93,6 +93,12 @@ input, textarea {
   background-color: pink;
 }
 
+.message {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: rgb(236, 243, 197);
+}
+
 #add-comment-form button {
   width: 320px;
 }
