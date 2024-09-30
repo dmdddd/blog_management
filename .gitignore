@@ -12,9 +12,13 @@ my-blog/coverage
 
 # production
 my-blog/build
-
-# production
+my-blog-backend/build
 my-blog-backend/credentials.json
+my-blog-backend/.env
+my-blog-backend/app.yaml
+my-blog-backend/prod-env.yaml
+
+
 
 # misc
 .DS_Store
