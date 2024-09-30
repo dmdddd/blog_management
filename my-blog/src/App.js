@@ -8,6 +8,7 @@ import ArticlePage from './pages/ArticlePage';
 import NotFoundPage from './pages/NotFoundPage';
 import LoginPage from './pages/LoginPage';
 import CreateAccuntPage from './pages/CreateAccountPage';
+import UpdateUserProfilePage from './pages/UpdateProfilePage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/articles/:articleId" element={<ArticlePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/create-account" element={<CreateAccuntPage />} />
+            <Route path="/update-profile" element={<UpdateUserProfilePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
