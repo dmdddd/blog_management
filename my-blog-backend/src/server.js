@@ -65,6 +65,31 @@ app.get('/api/articles/:name', async (req, res) => {
     }
 });
 
+app.get('/api/comments/:name', async (req, res) => {
+    const { name } = req.params;
+    const { uid } = req.user;
+
+    const comments = await db.collection('comments').find({ articleName: name }).toArray();
+
+    if (comments) {
+        // const canDelete = article.upvoteIds || [];
+        // article.canDelete = uid && upd === ;
+        // comments = comments.map((comment) => ({
+        //     ...comment,
+        //     canDelete: uid && uid === comment.postedBy,
+        //   }));
+        // comments.map(comment => ({ ...comment, canDelete: uid && uid === comment.postedB }))
+
+        comments.forEach(function (comment) {
+            comment.canDelete = req.user.email === comment.userEmail;
+          });
+        res.json(comments);
+    } else {
+        // No comments found for the article
+        res.json([]);
+    }
+});
+
 app.use((req, res, next) => {
     if (req.user) {
         next();
@@ -97,20 +122,18 @@ app.put('/api/articles/:name/upvote', async (req, res) => {
     }
 });
 
-app.post('/api/articles/:name/comments', async (req, res) => {
+app.post('/api/comments/add/:name', async (req, res) => {
     const { name } = req.params;
     const { text } = req.body;
     const user = req.user.name || req.user.email;
 
-    await db.collection('articles').updateOne({ name }, {
-        $push: { comments: { postedBy: user, text } },
+    await db.collection('comments').insertOne({
+        postedBy: user, text, articleName: name, userEmail: req.user.email,
     });
-    const article = await db.collection('articles').findOne({ name });
+    const comments = await db.collection('comments').find({ articleName: name }).toArray();
 
-    if (article) {
-        res.json(article);
-    } else {
-        res.send('That article doesn\'t exist!');
+    if (comments) {
+        res.json(comments);
     }
 });
 
