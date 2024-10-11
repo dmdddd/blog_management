@@ -1,9 +1,9 @@
 # TODO
 - [x] Add profile update page, letting users update display name
-- [x] Use articles from database, instead of the JSON, in ArticlePage
-- [ ] Create api to get all articles
-- [ ] Use articles from database, instead of the JSON, in ArticleListPage
+- [x] Retrieve articles from database, instead of the JSON, in ArticlePage
+- [x] Create api call to retrieve all articles
+- [x] Separate comments from articles by moving them to a different collection, support displaying and adding new ones
 - [ ] Add email verification info and option to UpdateProfilePage
-- [ ] Move comments to their own collection in MongoDB
 - [ ] Add comment deletetion button in the comments list
 - [ ] Add posting date to comments, display it in the comments list
+- [ ] Support user icons i in the comments list
