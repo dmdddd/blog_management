@@ -9,7 +9,8 @@ const ArticlePage = () => {
     // Adding a state "ArticleInfo" to the "ArticlePageComponent"
     // To set the state, we user setArticleInfo function
     // Currently initialized with { upvotes: 0, comments: [] }
-    const [articleInfo, setArticleInfo] = useState({ upvotes: 0, content: [], comments: [], canUpvote: false });
+    const [articleInfo, setArticleInfo] = useState({ upvotes: 0, canUpvote: false });
+    const [articleComments, setArticleComments] = useState([]);
     const {canUpvote} = articleInfo;
     const [articleFound, setArticleFound] = useState(false);
 
@@ -29,6 +30,15 @@ const ArticlePage = () => {
                 const newArticleInfo = response.data;
                 setArticleFound(true);
                 setArticleInfo(newArticleInfo);
+            } catch (e) {
+                console.log("Article '" + articleId + "' not found")
+            }
+
+            try {
+                const response = await axios.get(`/api/comments/${articleId}`, { headers });
+                const newArticleComments = response.data;
+                console.log(newArticleComments);
+                setArticleComments(newArticleComments);
             } catch (e) {
                 console.log("Article '" + articleId + "' not found")
             }
@@ -68,10 +78,10 @@ const ArticlePage = () => {
             { user
                 ? <AddCommentForm
                     articleName={articleId}
-                    onArticleupdated={updatedArticle => setArticleInfo(updatedArticle)} />
+                    onArticleupdated={updatedArticleComments => setArticleComments(updatedArticleComments)} />
                 : <button>Log in to add a comment</button>
             }
-            <CommentsList comments={articleInfo.comments}/>
+            <CommentsList comments={articleComments}/>
             </>
         );
     } else {
