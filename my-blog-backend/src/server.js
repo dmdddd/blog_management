@@ -3,6 +3,7 @@ import fs from 'fs';
 import admin from 'firebase-admin';
 import express from 'express';
 import { db, connectToDb } from './db.js';
+import { ObjectId } from 'mongodb';
 import 'dotenv/config';
 import path from 'path';
 
@@ -72,17 +73,9 @@ app.get('/api/comments/:name', async (req, res) => {
     const comments = await db.collection('comments').find({ articleName: name }).toArray();
 
     if (comments) {
-        // const canDelete = article.upvoteIds || [];
-        // article.canDelete = uid && upd === ;
-        // comments = comments.map((comment) => ({
-        //     ...comment,
-        //     canDelete: uid && uid === comment.postedBy,
-        //   }));
-        // comments.map(comment => ({ ...comment, canDelete: uid && uid === comment.postedB }))
-
         comments.forEach(function (comment) {
             comment.canDelete = req.user.email === comment.userEmail;
-          });
+        });
         res.json(comments);
     } else {
         // No comments found for the article
@@ -90,11 +83,32 @@ app.get('/api/comments/:name', async (req, res) => {
     }
 });
 
+
 app.use((req, res, next) => {
     if (req.user) {
         next();
     } else {
         res.sendStatus(401);
+    }
+});
+
+app.delete('/api/comments/delete/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const comment = await db.collection('comments').findOne({ _id: new ObjectId(id) });
+        if (comment) {
+            const canRemoveComment = req.user.email === comment.userEmail;
+            if (canRemoveComment) {
+                const result = await db.collection('comments').deleteOne({ _id: new ObjectId(id) });
+                if (result) {
+                    res.status(200).send({ message: "Item deleted successfully" });
+                }
+            }
+        } else {
+            res.status(404).send({ message: "Item not found" });
+        }
+    } catch (error) {
+        res.status(500).send({ message: "Error deleting item", error });
     }
 });
 
@@ -133,6 +147,10 @@ app.post('/api/comments/add/:name', async (req, res) => {
     const comments = await db.collection('comments').find({ articleName: name }).toArray();
 
     if (comments) {
+        // Adding the canDelete tag, otherwise, the comment deletion button will not appear
+        comments.forEach(function (comment) {
+            comment.canDelete = req.user.email === comment.userEmail;
+        });
         res.json(comments);
     }
 });
