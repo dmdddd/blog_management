@@ -4,6 +4,13 @@
 - [x] Create api call to retrieve all articles
 - [x] Separate comments from articles by moving them to a different collection, support displaying and adding new ones
 - [ ] Add email verification info and option to UpdateProfilePage
-- [ ] Add comment deletetion button in the comments list
+- [x] Add comment deletetion button in the comments list
+  - [x] Create a delete button in FE
+  - [x] Protect FE: Make sure the delete button is only visible to the owner of the comment
+  - [x] Be able to actually delete a comment in the BE
+  - [x] Protect BE: Make sure only owners can remove their comment using API
+  - [x] Update FE when a comment has been deleted
+  - [x] BUG: after adding a comment, the remove buttons disappear from all of the comments - neede to update the canDelete field after adding a comment in the BE
 - [ ] Add posting date to comments, display it in the comments list
-- [ ] Support user icons i in the comments list
+- [ ] Support user icons in the comments list
+- [ ] Add upvote to comments
