@@ -37,7 +37,6 @@ const ArticlePage = () => {
             try {
                 const response = await axios.get(`/api/comments/${articleId}`, { headers });
                 const newArticleComments = response.data;
-                console.log(newArticleComments);
                 setArticleComments(newArticleComments);
             } catch (e) {
                 console.log("Article '" + articleId + "' not found")
@@ -81,7 +80,9 @@ const ArticlePage = () => {
                     onArticleupdated={updatedArticleComments => setArticleComments(updatedArticleComments)} />
                 : <button>Log in to add a comment</button>
             }
-            <CommentsList comments={articleComments}/>
+            <CommentsList 
+                comments={articleComments}
+                onCommentRemoval={updatedArticleComments => setArticleComments(updatedArticleComments)}/>
             </>
         );
     } else {
