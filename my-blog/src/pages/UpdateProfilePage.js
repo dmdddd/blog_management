@@ -29,7 +29,7 @@ const UpdateUserProfilePage = () => {
 
                 const token = user && await user.getIdToken();
                 const headers = token ? { authtoken: token } : {};
-                const response = await axios.post(`/api/users/updateIcon`, {
+                const response = await axios.post(`/api/comments/updateIcon`, {
                     photoURL:icon,
                 }, {
                     headers,
