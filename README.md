@@ -17,8 +17,12 @@ Anyone can read articles, while logged in users can upvote articles(single upvot
 ### Technical Requirements
 - Users can login using Firebase Auth
 - Logged users can upvote an article, ones
+- Logged users can remove their upvote
 - Logged users can comment on articles
 - Non logged users can read articles
+- Users can update their display name and icon, to be shown in the comments
+- Default user icon is provided, if not specified
+- When a use updates their profile, updating their icon in all the comments
 
 # Tech
 ### How to run
