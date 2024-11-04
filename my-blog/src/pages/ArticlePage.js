@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+
 import axios from 'axios';
 import CommentsList from "../components/CommentsList";
 import AddCommentForm from "../components/AddCommentForm";
@@ -13,6 +14,7 @@ const ArticlePage = () => {
     const [articleComments, setArticleComments] = useState([]);
     const {canUpvote} = articleInfo;
     const [articleFound, setArticleFound] = useState(false);
+    const navigate = useNavigate();
 
     // useState -> adds memory
     // useEffect -> updates it
@@ -76,7 +78,7 @@ const ArticlePage = () => {
             <div className="upvotes-section">
                 { user
                     ? <button onClick={upDownVote}>{canUpvote ? 'Upvote' : 'Upvoted'}</button>
-                    : <button>Log in to upvote</button>
+                    : <button onClick={ () => { navigate('/login'); } }>Log in to upvote</button>
                     }
                 <p>This article has {articleInfo.upvotes} upvote(s)</p>
             </div>
@@ -87,7 +89,7 @@ const ArticlePage = () => {
                 ? <AddCommentForm
                     articleName={articleId}
                     onArticleupdated={updatedArticleComments => setArticleComments(updatedArticleComments)} />
-                : <button>Log in to add a comment</button>
+                : <button onClick={ () => { navigate('/login'); } } >Log in to comment</button>
             }
             <CommentsList 
                 comments={articleComments}
