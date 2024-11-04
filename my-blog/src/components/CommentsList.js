@@ -4,6 +4,7 @@ import useUser from "../hooks/useUser";
 const CommentsList = ({ comments, onCommentRemoval }) => {
 
     const { user } = useUser();
+    const defaultAvatar = "https://img.freepik.com/free-psd/3d-rendering-bear-emoji-icon_23-2150339725.jpg";
 
     const deleteComment = async ( commentId ) => {
         const token = user && await user.getIdToken();
@@ -21,26 +22,32 @@ const CommentsList = ({ comments, onCommentRemoval }) => {
         <>
         <h3>Comments:</h3>
         {comments.map(comment => (
-            <div className="comment" key={comment._id}>
-            <h4>{comment.postedBy}</h4>
-            {comment.createdOn && 
-                <div><span><i>
-                    {new Date(comment.createdOn).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric"
-                })} {new Date(comment.createdOn).toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit"
-                })}
-                    </i></span></div>
-            }
-            <p>{comment.text}</p>
-            <br/>
-            { comment.canDelete &&
-                <button onClick={() => deleteComment(comment._id)}>Delete</button>
-            }
+            <div className="comment-container" key={comment._id}>
+                <img src={comment.userIcon || defaultAvatar} 
+                alt={`${user.displayName}'s icon`} 
+                className="comment-icon"/>
+                
+                <div className="comment-content">
+                    <h4>{comment.postedBy}</h4>
+                    {comment.createdOn && 
+                        <div><span><i>
+                            {new Date(comment.createdOn).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric"
+                        })} {new Date(comment.createdOn).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit"
+                        })}
+                            </i></span></div>
+                    }
+                    <p>{comment.text}</p>
+                    <br/>
+                    { comment.canDelete &&
+                        <button onClick={() => deleteComment(comment._id)}>Delete</button>
+                    }
+                </div>
             </div>
         ))}
         </>
