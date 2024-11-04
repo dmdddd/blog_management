@@ -130,6 +130,32 @@ app.put('/api/articles/:name/upvote', async (req, res) => {
         }
 
         const updatedArticle = await db.collection('articles').findOne({ name });
+        updatedArticle.canUpvote = false;
+        res.json(updatedArticle);
+    } else {
+        res.send('That article doesn\'t exist');
+    }
+});
+
+app.put('/api/articles/:name/downvote', async (req, res) => {
+    const { name } = req.params;
+    const { uid } = req.user;
+
+    const article = await db.collection('articles').findOne({ name });
+
+    if (article) {
+        const upvoteIds = article.upvoteIds || [];
+        const canDownvote = uid && upvoteIds.includes(uid);
+
+        if (canDownvote) {
+            await db.collection('articles').updateOne({ name }, {
+                $inc: { upvotes: -1 },
+                $pull: { upvoteIds: uid },
+            });
+        }
+
+        const updatedArticle = await db.collection('articles').findOne({ name });
+        updatedArticle.canUpvote = true;
         res.json(updatedArticle);
     } else {
         res.send('That article doesn\'t exist');

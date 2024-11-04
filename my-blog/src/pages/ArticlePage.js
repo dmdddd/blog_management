@@ -50,12 +50,21 @@ const ArticlePage = () => {
     const params = useParams();
     const articleId = params.articleId;
 
-    const addUpvote = async () => {
+    const upDownVote = async () => {
         const token = user && await user.getIdToken();
         const headers = token ? { authtoken: token } : {};
-        const response = await axios.put(`/api/articles/${articleId}/upvote`, null, { headers });
-        const updatedArticle = response.data;
-        setArticleInfo(updatedArticle);
+        if (articleInfo.upvoteIds && articleInfo.upvoteIds.includes(user.reloadUserInfo.localId)) {
+            // Already upvoted, downvote
+            const response = await axios.put(`/api/articles/${articleId}/downvote`, null, { headers });
+            const updatedArticle = response.data;
+            setArticleInfo(updatedArticle);
+
+        } else {
+            // Never upvoted, upvote
+            const response = await axios.put(`/api/articles/${articleId}/upvote`, null, { headers });
+            const updatedArticle = response.data;
+            setArticleInfo(updatedArticle);
+        }
     }
 
     if (articleFound)
@@ -66,7 +75,7 @@ const ArticlePage = () => {
             <h1>{articleInfo.title}</h1>
             <div className="upvotes-section">
                 { user
-                    ? <button onClick={addUpvote}>{canUpvote ? 'Upvote' : 'Already Upvoted'}</button>
+                    ? <button onClick={upDownVote}>{canUpvote ? 'Upvote' : 'Upvoted'}</button>
                     : <button>Log in to upvote</button>
                     }
                 <p>This article has {articleInfo.upvotes} upvote(s)</p>

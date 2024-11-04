@@ -11,6 +11,7 @@
   - [x] Protect BE: Make sure only owners can remove their comment using API
   - [x] Update FE when a comment has been deleted
   - [x] BUG: after adding a comment, the remove buttons disappear from all of the comments - neede to update the canDelete field after adding a comment in the BE
+- [x] Let users remove their upvote from an article
 - [ ] Add posting date to comments, display it in the comments list
 - [ ] Support user icons in the comments list
 - [ ] Add upvote to comments
