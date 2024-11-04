@@ -13,5 +13,8 @@
   - [x] BUG: after adding a comment, the remove buttons disappear from all of the comments - neede to update the canDelete field after adding a comment in the BE
 - [x] Let users remove their upvote from an article
 - [x] Add posting date to comments, display it in the comments list
-- [ ] Support user icons in the comments list
+- [x] Support user icons in the comments list
+  - [x] FE: Add icons to the comment box
+  - [x] FE: Add icon URL to the comments in MongoDB
+  - [x] FE & BE: Update icon URLs in all of the users' comments when updating profile information
 - [ ] Add upvote to comments
