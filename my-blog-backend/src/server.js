@@ -168,7 +168,7 @@ app.post('/api/comments/add/:name', async (req, res) => {
     const user = req.user.name || req.user.email;
 
     await db.collection('comments').insertOne({
-        postedBy: user, text, articleName: name, userEmail: req.user.email,
+        postedBy: user, text, articleName: name, userEmail: req.user.email, "createdOn": new Date(),
     });
     const comments = await db.collection('comments').find({ articleName: name }).toArray();
 
