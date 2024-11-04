@@ -24,7 +24,6 @@ const CommentsList = ({ comments, onCommentRemoval }) => {
         {comments.map(comment => (
             <div className="comment-container" key={comment._id}>
                 <img src={comment.userIcon || defaultAvatar} 
-                alt={`${user.displayName}'s icon`} 
                 className="comment-icon"/>
                 
                 <div className="comment-content">
