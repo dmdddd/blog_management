@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAuth, updateProfile  } from 'firebase/auth';
 import useUser from "../hooks/useUser";
+import axios from 'axios';
 
 
 const UpdateUserProfilePage = () => {
@@ -13,21 +14,30 @@ const UpdateUserProfilePage = () => {
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const { user, isLoading } = useUser();
-    const navigate = useNavigate();
 
     const updateAccount = async () => {
         try {
-            // await updateProfile(getAuth(), {displayName, icon});
             console.log("Updating profile: " + displayName + ":" + icon)
-            // navigate('/');
-
 
             updateProfile(getAuth().currentUser, {
                 displayName: displayName, photoURL: icon
-              }).then(() => {
+              }).then(async () => {
                 // Profile updated!
                 setMessage("Profile updated!");
                 setError("");
+
+
+                const token = user && await user.getIdToken();
+                const headers = token ? { authtoken: token } : {};
+                const response = await axios.post(`/api/users/updateIcon`, {
+                    photoURL:icon,
+                }, {
+                    headers,
+                });
+
+                // const newArticleComments = response.data;
+                // setArticleComments(newArticleComments);
+
               }).catch((error) => {
                 // An error occurred
                 setMessage("");
@@ -42,9 +52,11 @@ const UpdateUserProfilePage = () => {
     useEffect(() => {
         // Define a function to retrieve the data
         const getUserData = async () => {
-            console.log(user);
-            if (user.displayName)
+            // console.log(user);
+            if (user.displayName) {
                 setDisplayName(user.displayName);
+                setIcon(user.photoURL);
+            }
         }
         if (!isLoading)
             getUserData();
@@ -56,7 +68,7 @@ const UpdateUserProfilePage = () => {
         { error && <p className="error">{error}</p>}
         { message && <p className="message">{message}</p>}
         <input
-            placeholder='Name'
+            placeholder='Display Name'
             value={displayName}
             onChange={e => setDisplayName(e.target.value)} />
         <input
