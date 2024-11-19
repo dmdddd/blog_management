@@ -1,22 +1,13 @@
-import fs from 'fs';
-import admin from 'firebase-admin';
 import express from 'express';
-import { db, connectToDb } from './db.js';
-import { ObjectId } from 'mongodb';
+import { connectToDb } from './db.js';
+import { admin } from './firebaseAdmin.js';
 import 'dotenv/config';
 import path from 'path';
 import { getAllArticles, getArticleByName, upvoteArticle, downvoteArticle } from './controllers/articleController.js';
-import { getCommentsForArticle, addCommentToArticle, deleteCommentById, updateIconForComments } from './controllers/commentController.js';
+import { getCommentsForArticle, addCommentToArticle, deleteCommentById, updateIconForComments, editCommentById } from './controllers/commentController.js';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const credentials = JSON.parse(
-    fs.readFileSync('./credentials.json')
-);
-admin.initializeApp({
-    credential: admin.credential.cert(credentials),
-});
 
 const app = express();
 app.use(express.json());
@@ -59,6 +50,7 @@ app.put('/api/articles/:name/downvote', downvoteArticle);
 
 app.delete('/api/comments/delete/:id', deleteCommentById);
 app.post('/api/comments/add/:name', addCommentToArticle);
+app.put('/api/comments/edit/:id', editCommentById);
 app.post('/api/comments/updateIcon', updateIconForComments);
 
 const PORT = process.env.PORT || 8000;
