@@ -1,20 +1,41 @@
 import axios from 'axios';
 import useUser from "../hooks/useUser";
+import Comment from './Comment';
 
 const CommentsList = ({ comments, onCommentRemoval }) => {
 
     const { user } = useUser();
-    const defaultAvatar = "https://img.freepik.com/free-psd/3d-rendering-bear-emoji-icon_23-2150339725.jpg";
 
-    const deleteComment = async ( commentId ) => {
-        const token = user && await user.getIdToken();
-        const headers = token ? { authtoken: token } : {};
-        const response = await axios.delete(`/api/comments/delete/${commentId}`,{headers});
-        if (response.status === 200) {
-            // Filter out the deleted comment from the comments state
-            onCommentRemoval((comments) =>
-                comments.filter((comment) => comment._id !== commentId)
-            );
+    const handleDeleteComment = async ( commentId ) => {
+        try {
+            const token = user && await user.getIdToken();
+            const headers = token ? { authtoken: token } : {};
+            const response = await axios.delete(`/api/comments/delete/${commentId}`,{headers});
+            if (response.status === 200) {
+                // Filter out the deleted comment from the comments state
+                onCommentRemoval((comments) =>
+                    comments.filter((comment) => comment._id !== commentId)
+                );
+            }
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
+    }
+
+    const handleSaveComment = async ( commentId, updatedText ) => {
+        try {
+            // Retrieve the authentication token if the user is logged in
+            const token = user && await user.getIdToken();
+            const headers = token ? { authtoken: token } : {};
+
+            // Prepare the data to be sent to the backend (e.g., the updated text of the comment)
+            const commentData = { text: updatedText, };
+
+            // Send the PUT request to update the comment
+            const response = await axios.put(`/api/comments/edit/${commentId}`, commentData, { headers });
+            
+        } catch (error) {
+            console.error('Error updating comment:', error);
         }
     }
 
@@ -22,32 +43,12 @@ const CommentsList = ({ comments, onCommentRemoval }) => {
         <>
         <h3>Comments:</h3>
         {comments.map(comment => (
-            <div className="comment-container" key={comment._id}>
-                <img src={comment.userIcon || defaultAvatar} 
-                className="comment-icon"/>
-                
-                <div className="comment-content">
-                    <h4>{comment.postedBy}</h4>
-                    {comment.createdOn && 
-                        <div><span><i>
-                            {new Date(comment.createdOn).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric"
-                        })} {new Date(comment.createdOn).toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit"
-                        })}
-                            </i></span></div>
-                    }
-                    <p>{comment.text}</p>
-                    <br/>
-                    { comment.canDelete &&
-                        <button onClick={() => deleteComment(comment._id)}>Delete</button>
-                    }
-                </div>
-            </div>
+            <Comment
+                key={comment._id}
+                comment={comment}
+                onSave={handleSaveComment}
+                onDelete={handleDeleteComment}
+            />
         ))}
         </>
     )
