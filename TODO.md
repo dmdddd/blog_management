@@ -18,3 +18,8 @@
   - [x] FE: Add icon URL to the comments in MongoDB
   - [x] FE & BE: Update icon URLs in all of the users' comments when updating profile information
 - [ ] Add upvote to comments
+- [ ] Allow users edit their comments
+  - [ ] FE: add an edit button
+  - [ ] FE: add a new component to edit text
+  - [ ] BE: add a "can edit" flag to comments
+  - [ ] BE: add API to edit coment text
