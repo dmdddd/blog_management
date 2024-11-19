@@ -19,6 +19,7 @@ Anyone can read articles, while logged in users can upvote articles(single upvot
 - Logged users can upvote an article, ones
 - Logged users can remove their upvote
 - Logged users can comment on articles
+- Logged in users can edit and delete their comments
 - Non logged users can read articles
 - Users can update their display name and icon, to be shown in the comments
 - Default user icon is provided, if not specified
@@ -35,7 +36,7 @@ Backend
 React  
 Packages: axios, firebase  
 #### Backend  
-Node.js  
+Node.js (ES Module Style)  
 Packages: express, firebase-admin, dotenv, nodemon 
 
 To build:
