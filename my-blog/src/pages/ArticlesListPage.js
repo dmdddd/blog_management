@@ -12,7 +12,6 @@ const ArticlesListPage = () => {
                 const response = await axios.get('/api/articles');
                 const articlesData = response.data;
                 setArticles(articlesData);
-                // console.log(articles);
             } catch (e) {
                 console.log("Articles not found")
             }

@@ -57,9 +57,13 @@ const ArticlePage = () => {
         const headers = token ? { authtoken: token } : {};
         if (articleInfo.upvoteIds && articleInfo.upvoteIds.includes(user.reloadUserInfo.localId)) {
             // Already upvoted, downvote
-            const response = await axios.put(`/api/articles/${articleId}/downvote`, null, { headers });
-            const updatedArticle = response.data;
-            setArticleInfo(updatedArticle);
+            try {
+                const response = await axios.put(`/api/articles/${articleId}/downvote`, null, { headers });
+                const updatedArticle = response.data;
+                setArticleInfo(updatedArticle);
+            } catch (e) {
+                console.log("Error: " + e)
+            }
 
         } else {
             // Never upvoted, upvote
