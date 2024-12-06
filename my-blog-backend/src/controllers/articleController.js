@@ -30,23 +30,23 @@ export const upvoteArticle = async (req, res) => {
 
     const article = await db.collection('articles').findOne({ name });
 
-    if (article) {
-        const upvoteIds = article.upvoteIds || [];
-        const canUpvote = uid && !upvoteIds.includes(uid);
-   
-        if (canUpvote) {
-            await db.collection('articles').updateOne({ name }, {
-                $inc: { upvotes: 1 },
-                $push: { upvoteIds: uid },
-            });
-        }
-
-        const updatedArticle = await db.collection('articles').findOne({ name });
-        updatedArticle.canUpvote = false;
-        res.json(updatedArticle);
-    } else {
+    if (!article) {
         res.send('That article doesn\'t exist');
     }
+    
+    const upvoteIds = article.upvoteIds || [];
+    const canUpvote = uid && !upvoteIds.includes(uid);
+
+    if (canUpvote) {
+        await db.collection('articles').updateOne({ name }, {
+            $inc: { upvotes: 1 },
+            $push: { upvoteIds: uid },
+        });
+    }
+
+    const updatedArticle = await db.collection('articles').findOne({ name });
+    updatedArticle.canUpvote = false;
+    res.json(updatedArticle);
 };
 
 export const downvoteArticle = async (req, res) => {
@@ -54,7 +54,7 @@ export const downvoteArticle = async (req, res) => {
     const { uid } = req.user;
 
     const article = await db.collection('articles').findOne({ name });
-
+    console.log(article)
     if (article) {
         const upvoteIds = article.upvoteIds || [];
         const canDownvote = uid && upvoteIds.includes(uid);
