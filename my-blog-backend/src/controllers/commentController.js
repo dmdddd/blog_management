@@ -36,19 +36,15 @@ export const addCommentToArticle = async (req, res) => {
     const userRecord = await admin.auth().getUser(req.user.uid); // retrieve user record from firebase
 
     // Add new comment
-    await db.collection('comments').insertOne({
+    const result = await db.collection('comments').insertOne({
         postedBy: user, text, articleName: name, userEmail: req.user.email, "createdOn": new Date(), userIcon: userRecord.photoURL,
     });
 
-    // Get updated list of comments
-    const comments = await db.collection('comments').find({ articleName: name }).toArray();
-
-    if (comments) {
-        // Adding the canDelete tag, otherwise, the comment deletion button will not appear
-        comments.forEach(function (comment) {
-            comment.canDelete = req.user.email === comment.userEmail;
-        });
-        res.json(comments);
+    const comment = await db.collection('comments').findOne({ _id: result.insertedId });
+    console.log(comment);
+    if (comment) {
+        comment.canDelete = req.user.email === comment.userEmail;
+        res.status(201).json(comment);
     }
 };
 
