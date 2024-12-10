@@ -10,7 +10,7 @@ const CommentsList = ({ comments, onCommentRemoval }) => {
         try {
             const token = user && await user.getIdToken();
             const headers = token ? { authtoken: token } : {};
-            const response = await axios.delete(`/api/comments/delete/${commentId}`,{headers});
+            const response = await axios.delete(`/api/comments/${commentId}`,{headers});
             if (response.status === 200) {
                 // Filter out the deleted comment from the comments state
                 onCommentRemoval((comments) =>
@@ -32,7 +32,7 @@ const CommentsList = ({ comments, onCommentRemoval }) => {
             const commentData = { text: updatedText, };
 
             // Send the PUT request to update the comment
-            const response = await axios.put(`/api/comments/edit/${commentId}`, commentData, { headers });
+            const response = await axios.put(`/api/comments/${commentId}`, commentData, { headers });
             
         } catch (error) {
             console.error('Error updating comment:', error);
