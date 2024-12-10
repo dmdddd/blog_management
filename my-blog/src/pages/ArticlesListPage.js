@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react"
+import { Link, useNavigate } from 'react-router-dom';
 import ArticlesList from "../components/ArticlesList";
 import axios from 'axios';
 
 const ArticlesListPage = () => {
     const [articles, setArticles] = useState([]);
+
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         // Define a function to retrieve the data
@@ -22,6 +26,9 @@ const ArticlesListPage = () => {
     return (
         <>
         <h1>Articles</h1>
+        <button onClick={() => {
+            navigate('/articles/add');
+        }}>Create Article</button>
         <ArticlesList articles={articles} />
         </>
     );

@@ -9,6 +9,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import LoginPage from './pages/LoginPage';
 import CreateAccuntPage from './pages/CreateAccountPage';
 import UpdateUserProfilePage from './pages/UpdateProfilePage';
+import AddArticlePage from './pages/AddArticlePage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/articles" element={<ArticlesListPage />} />
+            <Route path="/articles/add" element={<AddArticlePage />} />
             <Route path="/articles/:articleId" element={<ArticlePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/create-account" element={<CreateAccuntPage />} />
