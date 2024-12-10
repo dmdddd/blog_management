@@ -47,9 +47,9 @@ app.use((req, res, next) => {
 
 app.put('/api/articles/:name/vote', voteOnArticle);
 
-app.delete('/api/comments/delete/:id', deleteCommentById);
+app.delete('/api/comments/:id', deleteCommentById);
 app.post('/api/comments/add/:name', addCommentToArticle);
-app.put('/api/comments/edit/:id', editCommentById);
+app.put('/api/comments/:id', editCommentById);
 app.post('/api/comments/updateIcon', updateIconForComments);
 
 const PORT = process.env.PORT || 8080;
