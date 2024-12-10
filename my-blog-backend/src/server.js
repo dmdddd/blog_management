@@ -3,7 +3,7 @@ import { connectToDb } from './db.js';
 import { admin } from './firebaseAdmin.js';
 import 'dotenv/config';
 import path from 'path';
-import { getAllArticles, getArticleByName, upvoteArticle, downvoteArticle } from './controllers/articleController.js';
+import { getAllArticles, getArticleByName, voteOnArticle } from './controllers/articleController.js';
 import { getCommentsForArticle, addCommentToArticle, deleteCommentById, updateIconForComments, editCommentById } from './controllers/commentController.js';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
@@ -45,8 +45,7 @@ app.use((req, res, next) => {
     }
 });
 
-app.put('/api/articles/:name/upvote', upvoteArticle);
-app.put('/api/articles/:name/downvote', downvoteArticle);
+app.put('/api/articles/:name/vote', voteOnArticle);
 
 app.delete('/api/comments/delete/:id', deleteCommentById);
 app.post('/api/comments/add/:name', addCommentToArticle);
