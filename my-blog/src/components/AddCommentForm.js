@@ -9,7 +9,7 @@ const AddCommentForm = ({ articleName, onCommentAdded }) => {
     const addComment = async () => {
         const token = user && await user.getIdToken();
         const headers = token ? { authtoken: token } : {};
-        const response = await axios.post(`/api/comments/add/${articleName}`, {
+        const response = await axios.post(`/api/articles/${articleName}/comments`, {
             text:commentText,
         }, {
             headers,

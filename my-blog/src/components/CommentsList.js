@@ -11,7 +11,7 @@ const CommentsList = ({ comments, onCommentRemoval }) => {
             const token = user && await user.getIdToken();
             const headers = token ? { authtoken: token } : {};
             const response = await axios.delete(`/api/comments/${commentId}`,{headers});
-            if (response.status === 200) {
+            if (response.status === 204) {
                 // Filter out the deleted comment from the comments state
                 onCommentRemoval((comments) =>
                     comments.filter((comment) => comment._id !== commentId)

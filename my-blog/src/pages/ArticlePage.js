@@ -37,7 +37,7 @@ const ArticlePage = () => {
             }
 
             try {
-                const response = await axios.get(`/api/comments/${articleId}`, { headers });
+                const response = await axios.get(`/api/articles/${articleId}/comments`, { headers });
                 const newArticleComments = response.data;
                 setArticleComments(newArticleComments);
             } catch (e) {
