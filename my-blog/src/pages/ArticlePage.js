@@ -52,13 +52,13 @@ const ArticlePage = () => {
     const params = useParams();
     const articleId = params.articleId;
 
-    const upDownVote = async () => {
+    const voteOnArticle = async () => {
         const token = user && await user.getIdToken();
         const headers = token ? { authtoken: token } : {};
         if (articleInfo.upvoteIds && articleInfo.upvoteIds.includes(user.reloadUserInfo.localId)) {
             // Already upvoted, downvote
             try {
-                const response = await axios.put(`/api/articles/${articleId}/downvote`, null, { headers });
+                const response = await axios.put(`/api/articles/${articleId}/vote?type=down`, null, { headers });
                 const updatedArticle = response.data;
                 setArticleInfo(updatedArticle);
             } catch (e) {
@@ -67,7 +67,7 @@ const ArticlePage = () => {
 
         } else {
             // Never upvoted, upvote
-            const response = await axios.put(`/api/articles/${articleId}/upvote`, null, { headers });
+            const response = await axios.put(`/api/articles/${articleId}/vote?type=up`, null, { headers });
             const updatedArticle = response.data;
             setArticleInfo(updatedArticle);
         }
@@ -81,7 +81,7 @@ const ArticlePage = () => {
             <h1>{articleInfo.title}</h1>
             <div className="upvotes-section">
                 { user
-                    ? <button onClick={upDownVote}>{canUpvote ? 'Upvote' : 'Upvoted'}</button>
+                    ? <button onClick={voteOnArticle}>{canUpvote ? 'Upvote' : 'Upvoted'}</button>
                     : <button onClick={ () => { navigate('/login'); } }>Log in to upvote</button>
                     }
                 <p>This article has {articleInfo.upvotes} upvote(s)</p>
