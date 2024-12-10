@@ -53,7 +53,7 @@ app.post('/api/comments/add/:name', addCommentToArticle);
 app.put('/api/comments/edit/:id', editCommentById);
 app.post('/api/comments/updateIcon', updateIconForComments);
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8080;
 
 connectToDb(() => {
     console.log('Successfully connected to database!');
