@@ -21,3 +21,4 @@
 - [x] Allow users edit their comments
   - [x] FE: add a new component to edit text
   - [x] BE: add API to edit coment text
+- [ ] BE: add article creation endpoint
