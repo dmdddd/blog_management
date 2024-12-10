@@ -2,7 +2,7 @@ import { useState } from "react"
 import axios from 'axios';
 import useUser from "../hooks/useUser";
 
-const AddCommentForm = ({ articleName, onArticleupdated }) => {
+const AddCommentForm = ({ articleName, onCommentAdded }) => {
     const [commentText, setCommentText] = useState('');
     const { user } = useUser();
 
@@ -14,8 +14,8 @@ const AddCommentForm = ({ articleName, onArticleupdated }) => {
         }, {
             headers,
         });
-        const updatedArticle = response.data;
-        onArticleupdated(updatedArticle);
+        const newComment = response.data;
+        onCommentAdded(newComment);
         setCommentText('');
     }
 

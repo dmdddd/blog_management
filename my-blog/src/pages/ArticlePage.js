@@ -92,7 +92,7 @@ const ArticlePage = () => {
             { user
                 ? <AddCommentForm
                     articleName={articleId}
-                    onArticleupdated={updatedArticleComments => setArticleComments(updatedArticleComments)} />
+                    onCommentAdded={newComment => setArticleComments([...articleComments, newComment])} />
                 : <button onClick={ () => { navigate('/login'); } } >Log in to comment</button>
             }
             <CommentsList 
