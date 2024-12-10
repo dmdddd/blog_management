@@ -53,6 +53,10 @@ export const deleteCommentById = async (req, res) => {
     try {
         const { id } = req.params;
 
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).send({ message: "Invalid comment ID" });
+        }
+
         // Find the comment by ID
         const comment = await db.collection('comments').findOne({ _id: new ObjectId(id) });
         if (!comment) {
@@ -60,19 +64,20 @@ export const deleteCommentById = async (req, res) => {
         }
 
         // Check if the user is allowed to delete this comment
-        const canRemoveComment = req.user.email === comment.userEmail;
-        if (!canRemoveComment) {
+        if (req.user.email !== comment.userEmail) {
             return res.status(403).send({ message: "You are not authorized to delete this comment" });
         }
 
         const result = await db.collection('comments').deleteOne({ _id: new ObjectId(id) });
-        if (result) {
-            return res.status(200).send({ message: "Comment deleted successfully" });
+        if (result.deletedCount === 0) {
+            return res.status(404).send({ message: "Comment not found" });
         }
+
+        return res.status(204).send();
         
     } catch (error) {
         console.log(`Error deleting comment: ${error}`);
-        return res.status(500).send({ message: "Error deleting comment", error });
+        return res.status(500).send({ message: "An error occurred while deleting the comment" });
     }
 };
 

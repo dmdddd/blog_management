@@ -35,7 +35,7 @@ app.use(async (req, res, next) => {
 
 app.get('/api/articles', getAllArticles);
 app.get('/api/articles/:name', getArticleByName);
-app.get('/api/comments/:name', getCommentsForArticle);
+app.get('/api/articles/:name/comments', getCommentsForArticle);
 
 app.use((req, res, next) => {
     if (req.user) {
@@ -46,9 +46,8 @@ app.use((req, res, next) => {
 });
 
 app.put('/api/articles/:name/vote', voteOnArticle);
-
 app.delete('/api/comments/:id', deleteCommentById);
-app.post('/api/comments/add/:name', addCommentToArticle);
+app.post('/api/articles/:name/comments', addCommentToArticle);
 app.put('/api/comments/:id', editCommentById);
 app.post('/api/comments/updateIcon', updateIconForComments);
 
