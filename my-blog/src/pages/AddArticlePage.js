@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword} from 'firebase/auth'
 import slugify from 'slugify';
 import axios from 'axios';
+import { useBlog } from '../context/BlogContext';
 
 const AddArticlePage = () => {
+    const { currentBlog, loading, blogLoadingError } = useBlog();
+
+
     const [slug, setSlug] = useState('');
     const [isSlugEdited, setIsSlugEdited] = useState(false); // Track if the slug has been manually edited
     const [title, setTitle] = useState('');
@@ -37,6 +41,9 @@ const AddArticlePage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        setSlug(slugify(title, { lower: true, strict: true }));
+        
         // Validate slug
         if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
             setError('Invalid slug. Only lowercase letters, numbers, and hyphens are allowed.');
@@ -44,15 +51,15 @@ const AddArticlePage = () => {
         }
 
         try {
-            const response = await axios.get(`/api/articles/checkSlug/${slug}`);
+            const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/checkSlug/${slug}`);
             if (!response.data.isUnique) {
-                setError('Article with this ID already exists. Please choose a different one.');
+                setError('Article with this name already exists in the blog. Please choose a different one.');
                 setSuccess('');
                 return;
             }
 
             // Submit the article
-            await axios.post('/api/articles', { title, name:slug, text:content });
+            await axios.post(`/api/blogs/${currentBlog.name}/articles`, { blog:currentBlog.name, title, name:slug, text:content });
             setSuccess('Article created successfully!');
             setError('');
         } catch (err) {
@@ -74,29 +81,6 @@ const AddArticlePage = () => {
                         placeholder="Enter article title"
                         required
                     />
-                </div>
-                <div>
-                    <label>Name (ID):</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <input
-                            type="text"
-                            value={slug}
-                            onChange={handleSlugChange} // Allow manual edits
-                            placeholder="Edit or auto-generate id"
-                            required
-                        />
-                        <button type="button" onClick={() => {
-                            setSlug(slugify(title, { lower: true, strict: true }));
-                            setIsSlugEdited(false); // Allow auto-updating again
-                        }}
-                        style={{
-                            padding: '8px 12px',
-                            margin: '0px 0px 16px 0px',
-                        }}>
-                            Reset
-                        </button>
-                    </div>
-
                 </div>
                 {/* Dynamic URL preview */}
                 <div>

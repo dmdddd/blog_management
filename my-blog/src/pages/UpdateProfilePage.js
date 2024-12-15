@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { getAuth, updateProfile  } from 'firebase/auth';
 import useUser from "../hooks/useUser";
 import axios from 'axios';
@@ -26,10 +25,9 @@ const UpdateUserProfilePage = () => {
                 setMessage("Profile updated!");
                 setError("");
 
-
                 const token = user && await user.getIdToken();
                 const headers = token ? { authtoken: token } : {};
-                const response = await axios.post(`/api/comments/updateIcon`, {
+                await axios.post(`/api/comments/updateIcon`, {
                     photoURL:icon,
                 }, {
                     headers,

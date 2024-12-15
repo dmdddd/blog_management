@@ -26,6 +26,10 @@ Anyone can read articles, while logged in users can upvote articles(single upvot
 - When a use updates their profile, updating their icon in all the comments
 
 # Tech
+### What to install
+Install VScode - https://code.visualstudio.com/
+Install git - https://git-scm.com/downloads/win
+Install nodeJS - https://nodejs.org/en/
 ### How to run
 Frontend  
 ``npm start``  

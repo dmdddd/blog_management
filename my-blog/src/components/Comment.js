@@ -32,7 +32,7 @@ const Comment = ({ comment, onSave, onDelete }) => {
   return (
     <>
     <div className="comment-container" key={comment._id}>
-        <img src={comment.userIcon || defaultAvatar} 
+        <img alt='user icon' src={comment.userIcon || defaultAvatar} 
         className="comment-icon"/>
         
         <div className="comment-content">

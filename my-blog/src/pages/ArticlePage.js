@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 import axios from 'axios';
 import CommentsList from "../components/CommentsList";
 import AddCommentForm from "../components/AddCommentForm";
 import useUser from "../hooks/useUser";
+import { useBlog } from "../context/BlogContext";
 
 const ArticlePage = () => {
+    const location = useLocation();
+    const { currentBlog, loading, error } = useBlog();  // Access the currentBlog from context
+
+
     // Adding a state "ArticleInfo" to the "ArticlePageComponent"
     // To set the state, we user setArticleInfo function
     // Currently initialized with { upvotes: 0, comments: [] }
@@ -28,7 +33,7 @@ const ArticlePage = () => {
             const token = user && await user.getIdToken();
             const headers = token ? { authtoken: token } : {};
             try {
-                const response = await axios.get(`/api/articles/${articleId}`, { headers });
+                const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/${articleId}`, { headers });
                 const newArticleInfo = response.data;
                 setArticleFound(true);
                 setArticleInfo(newArticleInfo);
@@ -37,11 +42,11 @@ const ArticlePage = () => {
             }
 
             try {
-                const response = await axios.get(`/api/articles/${articleId}/comments`, { headers });
+                const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/${articleId}/comments`, { headers });
                 const newArticleComments = response.data;
                 setArticleComments(newArticleComments);
             } catch (e) {
-                console.log("Article '" + articleId + "' not found")
+                console.log("Comments for '" + articleId + "' not found: " + e)
             }
         }
         if (!isLoading) {
@@ -58,7 +63,7 @@ const ArticlePage = () => {
         if (articleInfo.upvoteIds && articleInfo.upvoteIds.includes(user.reloadUserInfo.localId)) {
             // Already upvoted, downvote
             try {
-                const response = await axios.put(`/api/articles/${articleId}/vote?type=down`, null, { headers });
+                const response = await axios.put(`/api/blogs/${currentBlog.name}/articles/${articleId}/vote?type=down`, null, { headers });
                 const updatedArticle = response.data;
                 setArticleInfo(updatedArticle);
             } catch (e) {
@@ -67,7 +72,7 @@ const ArticlePage = () => {
 
         } else {
             // Never upvoted, upvote
-            const response = await axios.put(`/api/articles/${articleId}/vote?type=up`, null, { headers });
+            const response = await axios.put(`/api/blogs/${currentBlog.name}/articles/${articleId}/vote?type=up`, null, { headers });
             const updatedArticle = response.data;
             setArticleInfo(updatedArticle);
         }
@@ -91,6 +96,7 @@ const ArticlePage = () => {
             ))}
             { user
                 ? <AddCommentForm
+                    blog={currentBlog.name}
                     articleName={articleId}
                     onCommentAdded={newComment => setArticleComments([...articleComments, newComment])} />
                 : <button onClick={ () => { navigate('/login'); } } >Log in to comment</button>

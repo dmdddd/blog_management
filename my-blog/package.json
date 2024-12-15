@@ -2,7 +2,7 @@
   "name": "my-blog",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8000/",
+  "proxy": "http://localhost:8080/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -11,8 +11,10 @@
     "firebase": "^10.13.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-quill": "^2.0.0",
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
+    "slugify": "^1.6.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
