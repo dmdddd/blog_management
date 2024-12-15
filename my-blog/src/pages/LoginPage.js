@@ -2,17 +2,19 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword} from 'firebase/auth'
 
+
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+
 
     const navigate = useNavigate();
 
     const logIn = async () => {
         try {
             await signInWithEmailAndPassword(getAuth(), email, password);
-            navigate('/articles');
+            navigate('/'); // TODO: maybe move to the log they were in?
         } catch (e) {
             setError(e.message);
         }
