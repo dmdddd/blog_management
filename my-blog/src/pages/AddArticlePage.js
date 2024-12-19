@@ -4,13 +4,13 @@ import { getAuth, signInWithEmailAndPassword} from 'firebase/auth'
 import slugify from 'slugify';
 import axios from 'axios';
 import { useBlog } from '../context/BlogContext';
+import ReactQuill from 'react-quill';
 
 const AddArticlePage = () => {
     const { currentBlog, loading, blogLoadingError } = useBlog();
 
 
     const [slug, setSlug] = useState('');
-    const [isSlugEdited, setIsSlugEdited] = useState(false); // Track if the slug has been manually edited
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [error, setError] = useState('');
@@ -23,20 +23,11 @@ const AddArticlePage = () => {
         const inputTitle = e.target.value;
         setTitle(inputTitle);
 
-        // Only update slug automatically if the user hasn't manually edited it
-        if (!isSlugEdited) {
-            const generatedSlug = slugify(inputTitle, {
-                lower: true,
-                strict: true,
-            });
-            setSlug(generatedSlug);
-        }
-    };
-
-    // Handle manual slug edits
-    const handleSlugChange = (e) => {
-        setSlug(e.target.value); // Allow manual changes
-        setIsSlugEdited(true); // Mark slug as edited
+        const generatedSlug = slugify(inputTitle, {
+            lower: true,
+            strict: true,
+        });
+        setSlug(generatedSlug);
     };
 
     const handleSubmit = async (e) => {
@@ -62,12 +53,14 @@ const AddArticlePage = () => {
             await axios.post(`/api/blogs/${currentBlog.name}/articles`, { blog:currentBlog.name, title, name:slug, text:content });
             setSuccess('Article created successfully!');
             setError('');
+            // Go to the new article
+            navigate(`/blogs/${currentBlog.name}/articles/${slug}`);
         } catch (err) {
             setError(`Failed to create the article. ${err}`);
             setSuccess('');
         }
     };
-
+      
     return (
         <div>
             <h1>Add New Article</h1>
@@ -88,14 +81,11 @@ const AddArticlePage = () => {
                 </div>
                 <div>
                     <label>Content:</label>
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Enter article content"
-                        rows="10"
-                        cols="50"
-                        required
+                    <ReactQuill 
+                        value={content} 
+                        onChange={setContent} 
                     />
+                    
                 </div>
                 <button type="submit">Add Article</button>
             </form>

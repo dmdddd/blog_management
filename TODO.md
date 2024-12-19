@@ -22,3 +22,6 @@
   - [x] FE: add a new component to edit text
   - [x] BE: add API to edit coment text
 - [ ] BE: add article creation endpoint
+
+ BUGS:
+ Editing article does not update global state

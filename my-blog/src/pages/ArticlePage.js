@@ -1,44 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-
+import TitleAndContentEditor from "../components/TitleAndContentEditor";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import slugify from 'slugify';
 import axios from 'axios';
 import CommentsList from "../components/CommentsList";
 import AddCommentForm from "../components/AddCommentForm";
 import useUser from "../hooks/useUser";
 import { useBlog } from "../context/BlogContext";
+import DOMPurify from 'dompurify';
 
 const ArticlePage = () => {
-    const location = useLocation();
-    const { currentBlog, loading, error } = useBlog();  // Access the currentBlog from context
-
-
-    // Adding a state "ArticleInfo" to the "ArticlePageComponent"
-    // To set the state, we user setArticleInfo function
-    // Currently initialized with { upvotes: 0, comments: [] }
-    const [articleInfo, setArticleInfo] = useState({ upvotes: 0, canUpvote: false });
+    const { currentBlog } = useBlog();  // Access the currentBlog from context
+    const [articleInfo, setArticleInfo] = useState({ upvotes: 0, canUpvote: false , content: ''});
     const [articleComments, setArticleComments] = useState([]);
     const {canUpvote} = articleInfo;
     const [articleFound, setArticleFound] = useState(false);
+    const [articleLoaded, setArticleLoaded] = useState(false);
+    const [isEditing, setIsEditing] = useState(false); // Track edit mode
+    const params = useParams();
+    const articleId = params.articleId;
+    const { user, isLoading } = useUser();
     const navigate = useNavigate();
 
-    // useState -> adds memory
-    // useEffect -> updates it
-    // Adding logic to our components, executed outside of the normal rendering
-
-    const { user, isLoading } = useUser();
     
     useEffect(() => {
         // Define a function to retrieve the data
         const loadArticleInfo = async () => {
+            console.log("Loading article: " + currentBlog.name + "/" + articleId)
             const token = user && await user.getIdToken();
             const headers = token ? { authtoken: token } : {};
             try {
                 const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/${articleId}`, { headers });
                 const newArticleInfo = response.data;
-                setArticleFound(true);
                 setArticleInfo(newArticleInfo);
+                setArticleFound(true);
             } catch (e) {
-                console.log("Article '" + articleId + "' not found")
+                console.error(`Failed to fetch article: '${articleId}' for blog '${currentBlog.name}': ${e.message}`);
+            } finally {
+                setArticleLoaded(true);
             }
 
             try {
@@ -46,16 +47,14 @@ const ArticlePage = () => {
                 const newArticleComments = response.data;
                 setArticleComments(newArticleComments);
             } catch (e) {
-                console.log("Comments for '" + articleId + "' not found: " + e)
+                console.error(`Failed to fetch comments for '${articleId}': not found: ${e}`)
             }
         }
-        if (!isLoading) {
+
+        if (!isLoading) { // User data loaded
             loadArticleInfo();
         }
-    }, [isLoading, user]);
-
-    const params = useParams();
-    const articleId = params.articleId;
+    }, [articleId, isLoading, user]);
 
     const voteOnArticle = async () => {
         const token = user && await user.getIdToken();
@@ -78,44 +77,125 @@ const ArticlePage = () => {
         }
     }
 
-    if (articleFound)
-    {
-        // Atricle found
+    const handleSave = async (title, content) => {
+        const token = user && await user.getIdToken();
+        const headers = token ? { authtoken: token } : {};
+        try {
+            const generatedSlug = slugify(title, {
+                lower: true,
+                strict: true,
+            });
+            const articleData = { name: generatedSlug, title: title, blog: currentBlog.name, text: content };
+            const response = await axios.put(`/api/blogs/${currentBlog.name}/articles/${articleId}`, articleData, { headers });
+            const updatedArticle = response.data;
+            setArticleInfo(updatedArticle);
+            setIsEditing(false);
+        } catch (e) {
+            console.log("Error: " + e)
+        }
+    }
+
+    const handleDelete = async () => {
+        try {
+            const token = user && await user.getIdToken();
+            const headers = token ? { authtoken: token } : {};
+            const response = await axios.delete(`/api/blogs/${currentBlog.name}/articles/${articleInfo.name}`,{headers});
+            if (response.status === 204) {
+                navigate(`/blogs/${currentBlog.name}/articles`);
+            }
+        } catch (error) {
+            console.error('Error deleting article:', error);
+        }
+    }
+
+    const handleEdit = () => {
+        setIsEditing(true);
+      };
+
+    if (!articleLoaded) {
+        // Show skeleton placeholders while loading
+        return (
+            <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+                {/* Simulate a blog title */}
+                <Skeleton height={40} width="60%" style={{ marginBottom: '20px' }} />
+
+                {/* Simulate blog meta info like author and date */}
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                    <Skeleton circle={true} height={50} width={50} style={{ marginRight: '10px' }} />
+                    <Skeleton height={20} width="40%" />
+                </div>
+
+                {/* Simulate the blog content */}
+                <Skeleton count={10} height={20} style={{ marginBottom: '10px' }} />
+                <Skeleton height={20} width="80%" style={{ marginBottom: '10px' }} />
+
+                {/* Simulate comments section */}
+                <h3>
+                    <Skeleton height={30} width="30%" />
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                    <Skeleton circle={true} height={40} width={40} style={{ marginRight: '10px' }} />
+                    <Skeleton height={20} width="60%" />
+                </div>
+                <Skeleton count={3} height={15} width="90%" style={{ marginBottom: '5px' }} />
+            </div>
+        );
+    }
+
+    if (articleLoaded && !articleFound){
         return (
             <>
-            <h1>{articleInfo.title}</h1>
-            <div className="upvotes-section">
-                { user
-                    ? <button onClick={voteOnArticle}>{canUpvote ? 'Upvote' : 'Upvoted'}</button>
-                    : <button onClick={ () => { navigate('/login'); } }>Log in to upvote</button>
-                    }
-                <p>This article has {articleInfo.upvotes} upvote(s)</p>
-            </div>
-            {articleInfo.content.map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-            ))}
-            { user
-                ? <AddCommentForm
-                    blog={currentBlog.name}
-                    articleName={articleId}
-                    onCommentAdded={newComment => setArticleComments([...articleComments, newComment])} />
-                : <button onClick={ () => { navigate('/login'); } } >Log in to comment</button>
-            }
-            <CommentsList 
-                comments={articleComments}
-                onCommentRemoval={updatedArticleComments => setArticleComments(updatedArticleComments)}/>
+                <h1>Article not found</h1>
+                <p>Blog: {currentBlog.title}</p>
+                <p>Requested article: {articleId}</p>
             </>
         );
-    } else {
-        // Article not found
-        return (
-            <>
-             <h1>Article not found</h1>
-             <p>Requested article: {articleId}</p>
-            </>
-        )
     }
+
+    return (
+        <>
+            {isEditing ? (
+                <div>
+                    <br/>
+                    <TitleAndContentEditor 
+                        initialTitle={articleInfo.title}
+                        initialContent={articleInfo.content}
+                        onSave={handleSave}
+                        onCancel={() => setIsEditing(false)} />
+                </div>
+            ) : (
+                <div>
+                    <h1>{articleInfo?.title}</h1>
+                    <div className="upvotes-section">
+                        {user ? (
+                            <button onClick={voteOnArticle}>{canUpvote ? 'Upvote' : 'Upvoted'}</button>
+                        ) : (
+                            <button onClick={() => { navigate('/login'); }}>Log in to upvote</button>
+                        )}
+                        <p>This article has {articleInfo.upvotes} upvote(s)</p>
+                    </div>
+                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(articleInfo.content) }} />
+                    <br />
+                    {user && <button onClick={handleEdit} className="edit-button">Edit</button>}
+                    {user && <button onClick={handleDelete} className="delete-button">Delete</button>}
+                </div>
+            )}
+            {user ? (
+                <AddCommentForm
+                    blog={currentBlog?.name}
+                    articleName={articleId}
+                    onCommentAdded={newComment => setArticleComments([...articleComments, newComment])}
+                />
+            ) : (
+                <button onClick={() => { navigate('/login'); }}>Log in to comment</button>
+            )}
     
+            <CommentsList
+                comments={articleComments}
+                onCommentRemoval={updatedArticleComments => setArticleComments(updatedArticleComments)}
+            />
+        </>
+    );
 }
 
 export default ArticlePage; 

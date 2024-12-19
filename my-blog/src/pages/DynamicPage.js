@@ -2,18 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBlog } from '../context/BlogContext';
 import axios from 'axios';
-import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // Import Quill styling
 import useUser from "../hooks/useUser";
+import TitleAndContentEditor from '../components/TitleAndContentEditor';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import slugify from 'slugify';
+
 
 const DynamicPage = () => {
     const { user } = useUser();
     const navigate = useNavigate();
     const { blogId, dynamicPageSlug } = useParams();
     const { currentBlog, blogPages, updatePageContent, loading, error } = useBlog();
+    const [loadedPage, setLoadedPage] = useState(false);
     const [pageContent, setPageContent] = useState(null); // State to store the matched page
     const [isEditing, setIsEditing] = useState(false); // Track edit mode
-    const [editedContent, setEditedContent] = useState(''); // Store edited content
 
     useEffect(() => {
         if (blogPages?.length) {
@@ -22,26 +26,35 @@ const DynamicPage = () => {
             (page) => page.slug === dynamicPageSlug
         );
         setPageContent(matchedPage);
-        setEditedContent(matchedPage.content);
+        setLoadedPage(true)
         }
-    }, [currentBlog, dynamicPageSlug]);
+    }, [blogPages, currentBlog, dynamicPageSlug]);
 
-    const handleSave = async () => {
+    const handleSave = async (editedTitle, editedContent) => {
         try {
             if (!pageContent) return;
 
             // Call API to save the updated content
-            await axios.put(`/api/blogs/${currentBlog.name}/pages/${pageContent.slug}`, {
-                content: editedContent,
-            });
 
-            // Update the local state
-            setPageContent((prev) => ({ ...prev, content: editedContent }));
+            
+            const titleChanged = pageContent.title !== editedTitle
+            const generatedSlug = slugify(editedTitle, {
+              lower: true,
+              strict: true,
+            });
+            const updates = {slug: generatedSlug, title: editedTitle, content: editedContent};
+            const response = await axios.put(`/api/blogs/${currentBlog.name}/pages/${pageContent.slug}`, updates);
+            const updatedPage = response.data;
+            setPageContent(updatedPage) // Update local state
             setIsEditing(false); // Exit edit mode
 
-            updatePageContent(pageContent._id, pageContent)
+            updatePageContent(updatedPage._id, updatedPage)
+
+            if (titleChanged) {
+              navigate(`/blogs/${currentBlog.name}/pages/${generatedSlug}`);
+            }
         } catch (err) {
-            console.error('Error saving page content:', err);
+            console.error('Error saving page content:', err.response?.data?.message, err);
             alert('Failed to save changes. Please try again.');
         }
     };
@@ -60,31 +73,34 @@ const DynamicPage = () => {
     }
   }
 
-    //   if (loading) return <div>Loading...</div>;
-//   if (!blogPages) return <div>Page not found</div>;
-//   if (!currentBlog) return <div>Blog not found</div>;
-//   if (error) return <div>Error: {error}</div>;
-
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
-  if (!pageContent) return <p>Page not found.</p>;
+  if (!loadedPage) {
+      // Show skeleton placeholders while loading
+      return (
+          <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+              {/* Simulate a blog title */}
+              <Skeleton height={40} width="60%" style={{ marginBottom: '20px' }} />
+
+              {/* Simulate the blog content */}
+              <Skeleton count={10} height={20} style={{ marginBottom: '10px' }} />
+              <Skeleton height={20} width="80%" style={{ marginBottom: '10px' }} />
+          </div>
+      );
+  }
+
+  if (loadedPage && !pageContent) return <p>Page not found.</p>;
 
   return (
     <div>
-      <h1>{pageContent?.title}</h1>
       {isEditing ? (
         <div>
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            rows="10"
-            cols="50"
-          />
-          <button onClick={handleSave}>Save</button>
-          <button onClick={() => setIsEditing(false)}>Cancel</button>
+          <br/>
+          <TitleAndContentEditor initialTitle={pageContent.title} initialContent={pageContent.content} onSave={handleSave} onCancel={() => setIsEditing(false)} />
         </div>
       ) : (
         <div>
+          <h1>{pageContent?.title}</h1>
           <div dangerouslySetInnerHTML={{ __html: pageContent.content }} />
           <button onClick={() => setIsEditing(true)}>Edit</button>
           <button onClick={handleDelete}>Delete</button>

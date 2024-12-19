@@ -103,7 +103,7 @@ input, textarea {
   width: 320px;
 }
 
-#upvotes-section button, p {
+#upvotes-section button, #upvotes-section p {
   display: inline-block;
   margin-right: 16px;
 }

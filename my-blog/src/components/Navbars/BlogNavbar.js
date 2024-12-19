@@ -17,7 +17,7 @@ const BlogNavbar = () => {
                 <li key="articles"><Link to={`/blogs/${currentBlog?.name}/articles`}>Articles</Link></li>
                 {blogPages.map((page) => (
                     <li key={page.slug}>
-                        <Link to={`/blogs/${currentBlog.name}/pages/${page.slug}`}>{page.title}</Link>
+                        <Link to={`/blogs/${currentBlog?.name}/pages/${page.slug}`}>{page.title}</Link>
                     </li>
                 ))}
             </ul>
