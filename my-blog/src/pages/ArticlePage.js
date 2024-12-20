@@ -23,6 +23,7 @@ const ArticlePage = () => {
     const articleId = params.articleId;
     const { user, isLoading } = useUser();
     const navigate = useNavigate();
+    const [formErrors, setFormErrors] = useState('');
 
     
     useEffect(() => {
@@ -85,13 +86,24 @@ const ArticlePage = () => {
                 lower: true,
                 strict: true,
             });
-            const articleData = { name: generatedSlug, title: title, blog: currentBlog.name, text: content };
+            if (content === "<p><br></p>") content = ""; // Quilt's default for empty text
+            const articleData = { name: generatedSlug, title: title, blog: currentBlog.name, content: content };
+            console.log(articleData);
             const response = await axios.put(`/api/blogs/${currentBlog.name}/articles/${articleId}`, articleData, { headers });
             const updatedArticle = response.data;
             setArticleInfo(updatedArticle);
             setIsEditing(false);
-        } catch (e) {
-            console.log("Error: " + e)
+            setFormErrors('');
+            if (generatedSlug !== articleInfo.name) { // slug changed
+                navigate(`/blogs/${currentBlog.name}/articles/${generatedSlug}`);
+            }
+        } catch (err) {
+            // Form validation errors
+            if (err.response && err.response.status === 400) {
+                setFormErrors(err.response.data.errors);
+            } else {
+                console.log("Error updating article: " + err)
+            }
         }
     }
 
@@ -160,8 +172,10 @@ const ArticlePage = () => {
                     <TitleAndContentEditor 
                         initialTitle={articleInfo.title}
                         initialContent={articleInfo.content}
+                        formErrors={formErrors}
+                        // setFormErrors={setFormErrors}
                         onSave={handleSave}
-                        onCancel={() => setIsEditing(false)} />
+                        onCancel={() => {setIsEditing(false); setFormErrors('');}} />
                 </div>
             ) : (
                 <div>

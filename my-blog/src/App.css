@@ -136,3 +136,13 @@ input, textarea {
   top: 8px;
   right: 8px;
 }
+
+.error {
+  color: red;
+  font-size: 12px;
+}
+
+input.error,
+textarea.error {
+  border: 1px solid red;
+}

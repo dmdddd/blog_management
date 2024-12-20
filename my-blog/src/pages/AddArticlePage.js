@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword} from 'firebase/auth'
+import ErrorMessage from '../components/ui/ErrorMessage';
 import slugify from 'slugify';
 import axios from 'axios';
 import { useBlog } from '../context/BlogContext';
@@ -8,13 +9,14 @@ import ReactQuill from 'react-quill';
 
 const AddArticlePage = () => {
     const { currentBlog, loading, blogLoadingError } = useBlog();
-
+f
 
     const [slug, setSlug] = useState('');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [formErrors, setFormErrors] = useState('');
 
     const navigate = useNavigate();
 
@@ -50,13 +52,20 @@ const AddArticlePage = () => {
             }
 
             // Submit the article
-            await axios.post(`/api/blogs/${currentBlog.name}/articles`, { blog:currentBlog.name, title, name:slug, text:content });
+            await axios.post(`/api/blogs/${currentBlog.name}/articles`, { blog:currentBlog.name, title, name:slug, content:content });
             setSuccess('Article created successfully!');
             setError('');
+            setFormErrors('');
             // Go to the new article
             navigate(`/blogs/${currentBlog.name}/articles/${slug}`);
         } catch (err) {
-            setError(`Failed to create the article. ${err}`);
+            // Form validation errors
+            if (err.response && err.response.status === 400) {
+                setError('');
+                setFormErrors(err.response.data.errors);
+            } else {
+                setError(`Failed to create the article: ${err}`);
+            }
             setSuccess('');
         }
     };
@@ -67,6 +76,7 @@ const AddArticlePage = () => {
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>Title:</label>
+                    <ErrorMessage message={formErrors.title} />
                     <input
                         type="text"
                         value={title}
@@ -81,11 +91,11 @@ const AddArticlePage = () => {
                 </div>
                 <div>
                     <label>Content:</label>
+                    <ErrorMessage message={formErrors.content} />
                     <ReactQuill 
                         value={content} 
                         onChange={setContent} 
                     />
-                    
                 </div>
                 <button type="submit">Add Article</button>
             </form>

@@ -18,6 +18,7 @@ const DynamicPage = () => {
     const [loadedPage, setLoadedPage] = useState(false);
     const [pageContent, setPageContent] = useState(null); // State to store the matched page
     const [isEditing, setIsEditing] = useState(false); // Track edit mode
+    const [formErrors, setFormErrors] = useState('');
 
     useEffect(() => {
         if (blogPages?.length) {
@@ -35,13 +36,13 @@ const DynamicPage = () => {
             if (!pageContent) return;
 
             // Call API to save the updated content
-
-            
-            const titleChanged = pageContent.title !== editedTitle
+            const titleChanged = pageContent.title !== editedTitle;
             const generatedSlug = slugify(editedTitle, {
               lower: true,
               strict: true,
             });
+            console.log(editedContent);
+            if (editedContent === "<p><br></p>") editedContent = ""; // Quilt's default for empty text
             const updates = {slug: generatedSlug, title: editedTitle, content: editedContent};
             const response = await axios.put(`/api/blogs/${currentBlog.name}/pages/${pageContent.slug}`, updates);
             const updatedPage = response.data;
@@ -49,13 +50,20 @@ const DynamicPage = () => {
             setIsEditing(false); // Exit edit mode
 
             updatePageContent(updatedPage._id, updatedPage)
-
+            setFormErrors('');
             if (titleChanged) {
               navigate(`/blogs/${currentBlog.name}/pages/${generatedSlug}`);
             }
         } catch (err) {
-            console.error('Error saving page content:', err.response?.data?.message, err);
+            // Form validation errors
+            if (err.response && err.response.status === 400) {
+              console.log(err.response.data.errors)
+              setFormErrors(err.response.data.errors);
+          } else {
             alert('Failed to save changes. Please try again.');
+            console.error('Error saving page content:', err.response?.data?.message, err);
+
+          }
         }
     };
 
@@ -96,7 +104,12 @@ const DynamicPage = () => {
       {isEditing ? (
         <div>
           <br/>
-          <TitleAndContentEditor initialTitle={pageContent.title} initialContent={pageContent.content} onSave={handleSave} onCancel={() => setIsEditing(false)} />
+          <TitleAndContentEditor 
+          initialTitle={pageContent.title} 
+          initialContent={pageContent.content} 
+          formErrors={formErrors} 
+          onSave={handleSave} 
+          onCancel={() => {setIsEditing(false); setFormErrors('');}} />
         </div>
       ) : (
         <div>

@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // Import Quill's CSS
+import ErrorMessage from './ui/ErrorMessage';
 
-const TitleAndContentEditor = ({ initialTitle = '', initialContent = '', onSave, onCancel }) => {
+const TitleAndContentEditor = ({
+  initialTitle = '',
+  initialContent = '',
+  formErrors = {}, // Pass in form errors from parent
+  onSave,
+  onCancel
+}) => {
   const [title, setTitle] = useState(initialTitle); // State for editor content
   const [content, setContent] = useState(initialContent); // State for editor content
 
@@ -21,6 +28,7 @@ const TitleAndContentEditor = ({ initialTitle = '', initialContent = '', onSave,
   return (
     <div>
       {/* Editable Title */}
+      <ErrorMessage message={formErrors.title} />
       <input
             type="text"
             value={title}
@@ -34,6 +42,7 @@ const TitleAndContentEditor = ({ initialTitle = '', initialContent = '', onSave,
             }}
           />
       {/* Editable Content */}
+      <ErrorMessage message={formErrors.content} />
       <ReactQuill 
         value={content} 
         onChange={setContent} 
@@ -45,5 +54,6 @@ const TitleAndContentEditor = ({ initialTitle = '', initialContent = '', onSave,
     </div>
   );
 };
+
 
 export default TitleAndContentEditor;
