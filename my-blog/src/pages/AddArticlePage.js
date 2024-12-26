@@ -60,9 +60,11 @@ const AddArticlePage = () => {
             navigate(`/blogs/${currentBlog.name}/articles/${slug}`);
         } catch (err) {
             // Form validation errors
-            if (err.response && err.response.status === 400) {
+            if (err.response?.status === 400) {
                 setError('');
                 setFormErrors(err.response.data.errors);
+            } else if (err.response?.status === 403) {
+                setError(err.response.data.message);
             } else {
                 setError(`Failed to create the article: ${err}`);
             }
