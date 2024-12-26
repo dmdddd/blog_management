@@ -6,17 +6,17 @@ import slugify from 'slugify';
 import axios from 'axios';
 import { useBlog } from '../context/BlogContext';
 import ReactQuill from 'react-quill';
+import useUser from '../hooks/useUser';
 
 const AddArticlePage = () => {
     const { currentBlog, loading, blogLoadingError } = useBlog();
-f
-
     const [slug, setSlug] = useState('');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [formErrors, setFormErrors] = useState('');
+    const { user } = useUser();
 
     const navigate = useNavigate();
 
@@ -35,8 +35,6 @@ f
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        setSlug(slugify(title, { lower: true, strict: true }));
-        
         // Validate slug
         if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
             setError('Invalid slug. Only lowercase letters, numbers, and hyphens are allowed.');
@@ -52,7 +50,9 @@ f
             }
 
             // Submit the article
-            await axios.post(`/api/blogs/${currentBlog.name}/articles`, { blog:currentBlog.name, title, name:slug, content:content });
+            const token = user && await user.getIdToken();
+            const headers = token ? { authtoken: token } : {};
+            await axios.post(`/api/blogs/${currentBlog.name}/articles`, { blog:currentBlog.name, title, name:slug, content:content }, { headers });
             setSuccess('Article created successfully!');
             setError('');
             setFormErrors('');
