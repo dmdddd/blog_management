@@ -28,9 +28,9 @@ const BlogsListPage = () => {
     return (
         <>
         <h1>Blogs</h1>
-        {/* <button onClick={() => {
-            navigate('/blogs/add');
-        }}>Create Blog</button> */}
+        <button onClick={() => {
+            navigate(`/create-blog`);
+        }}>Create Blog</button>
         <BlogsList blogs={blogs} />
         </>
     );

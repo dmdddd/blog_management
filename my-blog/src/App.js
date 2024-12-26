@@ -13,6 +13,7 @@ import UpdateUserProfilePage from './pages/UpdateProfilePage';
 import AddArticlePage from './pages/AddArticlePage';
 import { BlogProviderWithParams } from './context/BlogProviderWithParams';
 import DynamicPage from './pages/DynamicPage';
+import CreateBlogPage from './pages/CreateBlogPage';
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/update-profile" element={<UpdateUserProfilePage />} />
           <Route path="/create-account" element={<CreateAccuntPage />} />
+          <Route path="/create-blog" element={<CreateBlogPage />} />
         </Route>
 
         {/* Blog-Specific Routes */}
