@@ -6,6 +6,7 @@ import { useBlog } from '../context/BlogContext';  // Access blog context
 
 const ArticlesListPage = () => {
     const { blogId } = useParams(); // URL parameter
+    const [articlesLoaded, setArticlesLoaded] = useState(false);
     const [articles, setArticles] = useState([]);
     const navigate = useNavigate();
     const { currentBlog, loading, error } = useBlog();
@@ -18,6 +19,7 @@ const ArticlesListPage = () => {
                 const response = await axios.get(`/api/blogs/${blogId}/articles`);
                 const articlesData = response.data;
                 setArticles(articlesData);
+                setArticlesLoaded(true);
             } catch (e) {
                 console.log(`Articles not found for ${blogId}`);
             }
@@ -25,17 +27,29 @@ const ArticlesListPage = () => {
         loadArticles();
     }, [blogId]); // Re-run if blogId changes
 
-    if (!currentBlog) {
+    if (loading) {
         return <p>Loading blog details...</p>;  // Show loading if blog is not yet loaded
     }
 
-    if (articles.length === 0) {
+    if (!articlesLoaded) {
         return <p>Loading articles...</p>; // Show loading if articles are still being fetched
     }
 
     if (loading) {
         return <div>Loading blog...</div>;
     }
+
+    // if (!loading && articlesLoaded && articles.length === 0) {
+    //     return <div>None</div>;
+    // }
+
+    if (!loading && !currentBlog) {
+        return <>
+            <h1>Blog not found</h1>
+            <p>Blog: {blogId}</p>
+        </>
+    }
+
     if (error) {
         return <div>{error}</div>;
     }
