@@ -8,6 +8,7 @@ import TitleAndContentEditor from '../components/TitleAndContentEditor';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import slugify from 'slugify';
+import DOMPurify from 'dompurify';
 
 
 const DynamicPage = () => {
@@ -114,7 +115,7 @@ const DynamicPage = () => {
       ) : (
         <div>
           <h1>{pageContent?.title}</h1>
-          <div dangerouslySetInnerHTML={{ __html: pageContent.content }} />
+          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pageContent.contentt) }} />
           <button onClick={() => setIsEditing(true)}>Edit</button>
           <button onClick={handleDelete}>Delete</button>
         </div>
