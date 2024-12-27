@@ -9,17 +9,21 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import slugify from 'slugify';
 import DOMPurify from 'dompurify';
+import { toast } from '../components/ui/Toast';
+import DeletionConfirmationModal from '../components/ui/DeletionConfirmationModal';
+
 
 
 const DynamicPage = () => {
     const { user } = useUser();
     const navigate = useNavigate();
     const { blogId, dynamicPageSlug } = useParams();
-    const { currentBlog, blogPages, updatePageContent, loading, error } = useBlog();
+    const { currentBlog, blogPages, updatePageContent, deletePage, loading, error } = useBlog();
     const [loadedPage, setLoadedPage] = useState(false);
     const [pageContent, setPageContent] = useState(null); // State to store the matched page
     const [isEditing, setIsEditing] = useState(false); // Track edit mode
     const [formErrors, setFormErrors] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         if (blogPages?.length) {
@@ -51,34 +55,42 @@ const DynamicPage = () => {
             setIsEditing(false); // Exit edit mode
 
             updatePageContent(updatedPage._id, updatedPage)
+            toast.success('Page updated successfully!');
             setFormErrors('');
             if (titleChanged) {
               navigate(`/blogs/${currentBlog.name}/pages/${generatedSlug}`);
             }
-        } catch (err) {
+        } catch (error) {
             // Form validation errors
-            if (err.response && err.response.status === 400) {
-              console.log(err.response.data.errors)
-              setFormErrors(err.response.data.errors);
-          } else {
-            alert('Failed to save changes. Please try again.');
-            console.error('Error saving page content:', err.response?.data?.message, err);
-
-          }
+            if (error?.response.status === 400) {
+                setFormErrors(error.response.data.errors);
+            } else if (error?.response.status === 403) {
+                toast.error(error.response?.data?.message);
+            } else {
+                toast.error('Error editing page content: ' + error?.message);
+            }
         }
     };
 
   const handleDelete = async () => {
+    setIsModalOpen(false)
+
     try {
         if (!pageContent) return;
         const token = user && await user.getIdToken();
         const headers = token ? { authtoken: token } : {};
         const response = await axios.delete(`/api/blogs/${currentBlog.name}/pages/${pageContent.slug}`,{headers});
         if (response.status === 204) {
+            toast.success(`Page ${pageContent.title} deleted successfully!`);
+            deletePage(pageContent._id)
             navigate(`/blogs/${currentBlog.name}/articles`);
         }
     } catch (error) {
-        console.error('Error deleting page:', error);
+        if (error?.response.status === 403) {
+            toast.error(error.response?.data?.message);
+        } else {
+            toast.error('Error deleting page: ' + error.response?.data?.message);
+        }
     }
   }
 
@@ -117,9 +129,17 @@ const DynamicPage = () => {
           <h1>{pageContent?.title}</h1>
           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pageContent.content) }} />
           { ( currentBlog?.admin || currentBlog?.editor ) && <button onClick={() => setIsEditing(true)}>Edit</button> }
-          { currentBlog?.admin && <button onClick={handleDelete}>Delete</button> }
+          { currentBlog?.admin && <button onClick={() => setIsModalOpen(true)}>Delete</button> }
         </div>
       )}
+
+      <DeletionConfirmationModal
+          isOpen={isModalOpen}
+          onConfirm={handleDelete}
+          onCancel={() => setIsModalOpen(false)}
+          title="Are you sure you want to delete this page?"
+          message="This action cannot be undone."
+      />
     </div>
   );
 };
