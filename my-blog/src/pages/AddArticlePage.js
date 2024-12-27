@@ -7,14 +7,14 @@ import axios from 'axios';
 import { useBlog } from '../context/BlogContext';
 import ReactQuill from 'react-quill';
 import useUser from '../hooks/useUser';
+import { toast, useApiErrorToast } from '../components/ui/Toast';
+
 
 const AddArticlePage = () => {
     const { currentBlog, loading, blogLoadingError } = useBlog();
     const [slug, setSlug] = useState('');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [formErrors, setFormErrors] = useState('');
     const { user } = useUser();
 
@@ -37,15 +37,14 @@ const AddArticlePage = () => {
 
         // Validate slug
         if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-            setError('Invalid slug. Only lowercase letters, numbers, and hyphens are allowed.');
+            toast.error('Invalid slug. Only lowercase letters, numbers, and hyphens are allowed.');
             return;
         }
 
         try {
             const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/checkSlug/${slug}`);
             if (!response.data.isUnique) {
-                setError('Article with this name already exists in the blog. Please choose a different one.');
-                setSuccess('');
+                toast.error('Article with this name already exists in the blog. Please choose a different one.');
                 return;
             }
 
@@ -53,22 +52,19 @@ const AddArticlePage = () => {
             const token = user && await user.getIdToken();
             const headers = token ? { authtoken: token } : {};
             await axios.post(`/api/blogs/${currentBlog.name}/articles`, { blog:currentBlog.name, title, name:slug, content:content }, { headers });
-            setSuccess('Article created successfully!');
-            setError('');
+            toast.success('Article created successfully!');
             setFormErrors('');
             // Go to the new article
             navigate(`/blogs/${currentBlog.name}/articles/${slug}`);
         } catch (err) {
             // Form validation errors
             if (err.response?.status === 400) {
-                setError('');
                 setFormErrors(err.response.data.errors);
             } else if (err.response?.status === 403) {
-                setError(err.response.data.message);
+                toast.error(err.response.data.message);
             } else {
-                setError(`Failed to create the article: ${err}`);
+                toast.error(`Failed to create the article: ${err}`);
             }
-            setSuccess('');
         }
     };
       
@@ -101,10 +97,6 @@ const AddArticlePage = () => {
                 </div>
                 <button type="submit">Add Article</button>
             </form>
-
-            {/* Display success or error messages */}
-            {success && <p style={{ color: 'green' }}>{success}</p>}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );
 }

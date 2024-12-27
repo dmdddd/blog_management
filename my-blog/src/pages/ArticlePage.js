@@ -10,6 +10,8 @@ import AddCommentForm from "../components/AddCommentForm";
 import useUser from "../hooks/useUser";
 import { useBlog } from "../context/BlogContext";
 import DOMPurify from 'dompurify';
+import { toast, useApiErrorToast } from '../components/ui/Toast';
+
 
 const ArticlePage = () => {
     const { currentBlog } = useBlog();  // Access the currentBlog from context
@@ -25,7 +27,6 @@ const ArticlePage = () => {
     const navigate = useNavigate();
     const [formErrors, setFormErrors] = useState('');
 
-    
     useEffect(() => {
         // Define a function to retrieve the data
         const loadArticleInfo = async () => {
@@ -33,18 +34,18 @@ const ArticlePage = () => {
             const token = user && await user.getIdToken();
             const headers = token ? { authtoken: token } : {};
             try {
-                const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/${articleId}`, { headers });
+                const response = await axios.get(`/api/blogs/${currentBlog?.name}/articles/${articleId}`, { headers });
                 const newArticleInfo = response.data;
                 setArticleInfo(newArticleInfo);
                 setArticleFound(true);
             } catch (e) {
-                console.error(`Failed to fetch article: '${articleId}' for blog '${currentBlog.name}': ${e.message}`);
+                toast.error(`Failed to fetch article: '${articleId}' for blog '${currentBlog?.name}': ${e.message}`);
             } finally {
                 setArticleLoaded(true);
             }
 
             try {
-                const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/${articleId}/comments`, { headers });
+                const response = await axios.get(`/api/blogs/${currentBlog?.name}/articles/${articleId}/comments`, { headers });
                 const newArticleComments = response.data;
                 setArticleComments(newArticleComments);
             } catch (e) {
@@ -52,10 +53,10 @@ const ArticlePage = () => {
             }
         }
 
-        if (!isLoading) { // User data loaded
+        if (currentBlog && !isLoading) { // User data loaded
             loadArticleInfo();
         }
-    }, [articleId, isLoading, user]);
+    }, [articleId, currentBlog, isLoading, user]);
 
     const voteOnArticle = async () => {
         const token = user && await user.getIdToken();
@@ -88,7 +89,6 @@ const ArticlePage = () => {
             });
             if (content === "<p><br></p>") content = ""; // Quilt's default for empty text
             const articleData = { name: generatedSlug, title: title, blog: currentBlog.name, content: content };
-            console.log(articleData);
             const response = await axios.put(`/api/blogs/${currentBlog.name}/articles/${articleId}`, articleData, { headers });
             const updatedArticle = response.data;
             setArticleInfo(updatedArticle);
@@ -99,10 +99,12 @@ const ArticlePage = () => {
             }
         } catch (err) {
             // Form validation errors
-            if (err.response && err.response.status === 400) {
+            if (err.response?.status === 400) {
                 setFormErrors(err.response.data.errors);
+            } else if (err.response?.status === 403) {
+                toast.error(err.response.data.message);
             } else {
-                console.log("Error updating article: " + err)
+                toast.error("Error updating article: " + err);
             }
         }
     }
@@ -116,7 +118,11 @@ const ArticlePage = () => {
                 navigate(`/blogs/${currentBlog.name}/articles`);
             }
         } catch (error) {
-            console.error('Error deleting article:', error);
+            if (error.response?.status === 403) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Error deleting article: " + error);
+            }
         }
     }
 
@@ -158,7 +164,7 @@ const ArticlePage = () => {
         return (
             <>
                 <h1>Article not found</h1>
-                <p>Blog: {currentBlog.title}</p>
+                <p>Blog: {currentBlog?.title}</p>
                 <p>Requested article: {articleId}</p>
             </>
         );
@@ -166,7 +172,7 @@ const ArticlePage = () => {
 
     return (
         <>
-            {isEditing ? (
+            { isEditing ? (
                 <div>
                     <br/>
                     <TitleAndContentEditor 
@@ -190,11 +196,11 @@ const ArticlePage = () => {
                     </div>
                     <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(articleInfo.content) }} />
                     <br />
-                    {user && <button onClick={handleEdit} className="edit-button">Edit</button>}
-                    {user && <button onClick={handleDelete} className="delete-button">Delete</button>}
+                    {(articleInfo.admin || articleInfo.editor) && <button onClick={handleEdit} className="edit-button">Edit</button>}
+                    {articleInfo.admin && <button onClick={handleDelete} className="delete-button">Delete</button>}
                 </div>
             )}
-            {user ? (
+            { user ? (
                 <AddCommentForm
                     blog={currentBlog?.name}
                     articleName={articleId}
@@ -203,11 +209,14 @@ const ArticlePage = () => {
             ) : (
                 <button onClick={() => { navigate('/login'); }}>Log in to comment</button>
             )}
-    
-            <CommentsList
-                comments={articleComments}
-                onCommentRemoval={updatedArticleComments => setArticleComments(updatedArticleComments)}
-            />
+            { articleComments.length === 0?
+                <p>No comments yet</p>
+                :
+                <CommentsList
+                    comments={articleComments}
+                    onCommentRemoval={updatedArticleComments => setArticleComments(updatedArticleComments)}
+                />
+            }
         </>
     );
 }
