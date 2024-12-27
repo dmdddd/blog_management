@@ -69,9 +69,15 @@ export const BlogProvider = ({ blogId, blog: initialBlog, children }) => {
       return updatedPages;
   };
 
+  const deletePage = async (pageId) => {
+    const updatedPages = blogPages.filter((page) => page._id !== pageId);
+    setBlogPages(updatedPages);
+    return updatedPages;
+};
+
   // Provide the blog data to the context
   return (
-    <BlogContext.Provider value={{ currentBlog, blogPages, updatePageContent, loading, error }}>
+    <BlogContext.Provider value={{ currentBlog, blogPages, updatePageContent, deletePage, loading, error }}>
       {children}
     </BlogContext.Provider>
   );
