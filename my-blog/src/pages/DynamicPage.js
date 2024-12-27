@@ -42,7 +42,7 @@ const DynamicPage = () => {
               lower: true,
               strict: true,
             });
-            console.log(editedContent);
+
             if (editedContent === "<p><br></p>") editedContent = ""; // Quilt's default for empty text
             const updates = {slug: generatedSlug, title: editedTitle, content: editedContent};
             const response = await axios.put(`/api/blogs/${currentBlog.name}/pages/${pageContent.slug}`, updates);
@@ -115,9 +115,9 @@ const DynamicPage = () => {
       ) : (
         <div>
           <h1>{pageContent?.title}</h1>
-          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pageContent.contentt) }} />
-          <button onClick={() => setIsEditing(true)}>Edit</button>
-          <button onClick={handleDelete}>Delete</button>
+          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pageContent.content) }} />
+          { ( currentBlog?.admin || currentBlog?.editor ) && <button onClick={() => setIsEditing(true)}>Edit</button> }
+          { currentBlog?.admin && <button onClick={handleDelete}>Delete</button> }
         </div>
       )}
     </div>
