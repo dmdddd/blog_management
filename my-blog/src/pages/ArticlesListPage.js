@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import ArticlesList from "../components/ArticlesList";
 import axios from 'axios';
 import { useBlog } from '../context/BlogContext';  // Access blog context
+import useUser from "../hooks/useUser";
 
 const ArticlesListPage = () => {
     const { blogId } = useParams(); // URL parameter
@@ -10,13 +11,16 @@ const ArticlesListPage = () => {
     const [articles, setArticles] = useState([]);
     const navigate = useNavigate();
     const { currentBlog, loading, error } = useBlog();
+    const { user, isLoading } = useUser();
 
 
     // Fetch articles
     useEffect(() => {
         const loadArticles = async () => {
             try {
-                const response = await axios.get(`/api/blogs/${blogId}/articles`);
+                const token = user && await user.getIdToken();
+                const headers = token ? { authtoken: token } : {};
+                const response = await axios.get(`/api/blogs/${blogId}/articles`, { headers });
                 const articlesData = response.data;
                 setArticles(articlesData);
                 setArticlesLoaded(true);
@@ -24,8 +28,9 @@ const ArticlesListPage = () => {
                 console.log(`Articles not found for ${blogId}`);
             }
         };
-        loadArticles();
-    }, [blogId]); // Re-run if blogId changes
+        if (currentBlog && !isLoading)
+            loadArticles();
+    }, [blogId, isLoading, currentBlog]); // Re-run if blogId changes
 
     if (loading) {
         return <p>Loading blog details...</p>;  // Show loading if blog is not yet loaded
@@ -38,10 +43,6 @@ const ArticlesListPage = () => {
     if (loading) {
         return <div>Loading blog...</div>;
     }
-
-    // if (!loading && articlesLoaded && articles.length === 0) {
-    //     return <div>None</div>;
-    // }
 
     if (!loading && !currentBlog) {
         return <>
@@ -56,12 +57,16 @@ const ArticlesListPage = () => {
     
     return (
         <>
-        <h1>{currentBlog.name.title}</h1>
-        <p>{currentBlog.name.description}</p>
+        <h1>{currentBlog?.name.title}</h1>
+        <p>{currentBlog?.name.description}</p>
         <h2>Articles</h2>
-        <button onClick={() => {
-            navigate(`/blogs/${currentBlog.name}/articles/add`);
-        }}>Create Article</button>
+        {
+            (currentBlog.admin || currentBlog.editor) &&
+            <button onClick={() => {
+                navigate(`/blogs/${currentBlog?.name}/articles/add`);
+            }}>Create Article</button>
+
+        }
         <ArticlesList articles={articles} blog={currentBlog.name} />
         </>
     );
