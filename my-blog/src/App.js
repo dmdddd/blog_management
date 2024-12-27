@@ -14,51 +14,55 @@ import AddArticlePage from './pages/AddArticlePage';
 import { BlogProviderWithParams } from './context/BlogProviderWithParams';
 import DynamicPage from './pages/DynamicPage';
 import CreateBlogPage from './pages/CreateBlogPage';
+import { ToastProvider } from './components/ui/Toast';
+
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        {/* General Routes */}
-        <Route
-          path="/"
-          element={<Layout />} // No BlogProvider for general pages
-        >
-          <Route index element={<BlogsListPage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="home" element={<HomePage />} />
+    <ToastProvider>
+      <Router>
+        <Routes>
+          {/* General Routes */}
+          <Route
+            path="/"
+            element={<Layout />} // No BlogProvider for general pages
+          >
+            <Route index element={<BlogsListPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="home" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/update-profile" element={<UpdateUserProfilePage />} />
+            <Route path="/create-account" element={<CreateAccuntPage />} />
+            <Route path="/create-blog" element={<CreateBlogPage />} />
+          </Route>
+
+          {/* Blog-Specific Routes */}
+          <Route
+            path="/blogs/:blogId/*"
+            element={
+              <BlogProviderWithParams>
+                <Layout /> {/* Wrapped with BlogProvider for blog-specific routes */}
+              </BlogProviderWithParams>
+            }
+          >
+            {/* Predefined pages */}
+            <Route path="articles" element={<ArticlesListPage />} />
+            <Route path="articles/add" element={<AddArticlePage />} />
+            <Route path="articles/:articleId" element={<ArticlePage />} />
+
+            {/* Dynamic pages */}
+            <Route path="pages/:dynamicPageSlug" element={<DynamicPage />} />
+          </Route>
+
+          {/* User-Related Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/update-profile" element={<UpdateUserProfilePage />} />
-          <Route path="/create-account" element={<CreateAccuntPage />} />
-          <Route path="/create-blog" element={<CreateBlogPage />} />
-        </Route>
 
-        {/* Blog-Specific Routes */}
-        <Route
-          path="/blogs/:blogId/*"
-          element={
-            <BlogProviderWithParams>
-              <Layout /> {/* Wrapped with BlogProvider for blog-specific routes */}
-            </BlogProviderWithParams>
-          }
-        >
-          {/* Predefined pages */}
-          <Route path="articles" element={<ArticlesListPage />} />
-          <Route path="articles/add" element={<AddArticlePage />} />
-          <Route path="articles/:articleId" element={<ArticlePage />} />
-
-          {/* Dynamic pages */}
-          <Route path="pages/:dynamicPageSlug" element={<DynamicPage />} />
-        </Route>
-
-        {/* User-Related Routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/update-profile" element={<UpdateUserProfilePage />} />
-
-        {/* Catch-All for 404 */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Router>
+          {/* Catch-All for 404 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Router>
+    </ToastProvider>
   );
 };
 
