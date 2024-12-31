@@ -32,16 +32,17 @@ const CreateBlogPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const token = user && await user.getIdToken();
+        const headers = token ? { authtoken: token } : {};
+
         try {
-            const response = await axios.get(`/api/blogs/checkSlug/${slug}`);
+            const response = await axios.get(`/api/blogs/checkSlug/${slug}`, { headers });
             if (!response.data.isUnique) {
                 toast.error('Blog with this name already exists. Please choose a different one.');
                 return;
             }
 
             // Submit the blog
-            const token = user && await user.getIdToken();
-            const headers = token ? { authtoken: token } : {};
             await axios.post(`/api/blogs`, { title:title, name:slug, description:description }, { headers });
             setFormErrors('');
             toast.success('Blog created successfully!');

@@ -41,16 +41,17 @@ const AddArticlePage = () => {
             return;
         }
 
+        const token = user && await user.getIdToken();
+        const headers = token ? { authtoken: token } : {};
+
         try {
-            const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/checkSlug/${slug}`);
+            const response = await axios.get(`/api/blogs/${currentBlog.name}/articles/checkSlug/${slug}`, { headers });
             if (!response.data.isUnique) {
                 toast.error('Article with this name already exists in the blog. Please choose a different one.');
                 return;
             }
 
             // Submit the article
-            const token = user && await user.getIdToken();
-            const headers = token ? { authtoken: token } : {};
             await axios.post(`/api/blogs/${currentBlog.name}/articles`, { blog:currentBlog.name, title, name:slug, content:content }, { headers });
             toast.success('Article created successfully!');
             setFormErrors('');
