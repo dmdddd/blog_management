@@ -1,16 +1,18 @@
 import axios from 'axios';
 import useUser from "../hooks/useUser";
 import Comment from './Comment';
+import { toast } from '../components/ui/Toast';
 
 const CommentsList = ({ comments, onCommentRemoval }) => {
 
     const { user } = useUser();
 
-    const handleDeleteComment = async ( commentId ) => {
+    const handleDeleteComment = async ( blogSlug, articleSlug, commentId ) => {
         try {
             const token = user && await user.getIdToken();
             const headers = token ? { authtoken: token } : {};
-            const response = await axios.delete(`/api/comments/${commentId}`,{headers});
+            
+            const response = await axios.delete(`/api/blogs/${blogSlug}/articles/${articleSlug}/comments/${commentId}`,{headers});
             if (response.status === 204) {
                 // Filter out the deleted comment from the comments state
                 onCommentRemoval((comments) =>
@@ -18,11 +20,12 @@ const CommentsList = ({ comments, onCommentRemoval }) => {
                 );
             }
         } catch (error) {
-            console.error('Error deleting comment:', error);
+            toast.error(`Error deleting comment: ${error.response?.data?.message}`);
         }
+    
     }
 
-    const handleSaveComment = async ( commentId, updatedText ) => {
+    const handleSaveComment = async ( blogSlug, articleSlug, commentId, updatedText ) => {
         try {
             // Retrieve the authentication token if the user is logged in
             const token = user && await user.getIdToken();
@@ -32,10 +35,10 @@ const CommentsList = ({ comments, onCommentRemoval }) => {
             const commentData = { text: updatedText, };
 
             // Send the PUT request to update the comment
-            const response = await axios.put(`/api/comments/${commentId}`, commentData, { headers });
+            await axios.put(`/api/blogs/${blogSlug}/articles/${articleSlug}/comments/${commentId}`, commentData, { headers });
             
         } catch (error) {
-            console.error('Error updating comment:', error);
+            toast.error(`Error editing comment: ${error.response?.data?.message}`);
         }
     }
 

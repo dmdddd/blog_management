@@ -5,6 +5,8 @@ const Comment = ({ comment, onSave, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [commentText, setCommentText] = useState(comment.text);
   const [tempText, setTempText] = useState(comment.text);
+  const isEdited = comment.createdAt !== comment.updatedAt;
+
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -18,11 +20,11 @@ const Comment = ({ comment, onSave, onDelete }) => {
   const handleSave = () => {
     setIsEditing(false);
     setCommentText(tempText); // Save changes locally
-    onSave(comment._id, tempText); // Pass id and updated text to parent
+    onSave(comment.blog, comment.articleName, comment._id, tempText); // Pass id and updated text to parent
   };
 
   const handleDelete = () => {
-    onDelete(comment._id); // Pass id to parent
+    onDelete(comment.blog, comment.articleName, comment._id);
   };
 
   const handleChange = (e) => {
@@ -36,14 +38,14 @@ const Comment = ({ comment, onSave, onDelete }) => {
         className="comment-icon"/>
         
         <div className="comment-content">
-            <h4>{comment.postedBy}</h4>
-            {comment.createdOn && 
+            <h4>{comment.postedBy || comment.userEmail}</h4>
+            {comment.createdAt && 
                 <div><span><i>
-                    {new Date(comment.createdOn).toLocaleDateString("en-US", {
+                    {new Date(comment.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric"
-                })} {new Date(comment.createdOn).toLocaleTimeString("en-US", {
+                })} {new Date(comment.createdAt).toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                     second: "2-digit"
@@ -67,7 +69,19 @@ const Comment = ({ comment, onSave, onDelete }) => {
                 ) : (
                     <>
                     <p className="comment-text">{commentText}</p>
-                    <br/>
+                    {isEdited && 
+                        <div><span>Last edited: <i> 
+                            {new Date(comment.updatedAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric"
+                        })} {new Date(comment.updatedAt).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit"
+                        })}
+                            </i></span></div>
+                    }
                     { comment.canDelete && <button onClick={handleEdit} className="edit-button">Edit</button>}
                     { comment.canDelete && <button onClick={handleDelete} className="delete-button">Delete</button>}
                     </>
