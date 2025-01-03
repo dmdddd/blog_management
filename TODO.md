@@ -1,6 +1,7 @@
 # TODO
 These is a list of all the frontend todo tasks
 - [ ] Add email verification info and option to UpdateProfilePage
+- [ ] FE: arror when logging out and I'm in the edit user information window, need to reroute to main page(?)
 
 ---
 Previous:
