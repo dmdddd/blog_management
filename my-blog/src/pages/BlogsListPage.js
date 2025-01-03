@@ -19,7 +19,7 @@ const BlogsListPage = () => {
         hasNext: false,
         hasPrev: false,
     });
-    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortBy, setSortBy] = useState('updatedAt');
     const [sortDir, setSortDir] = useState('asc');
 
     useEffect(() => {
@@ -28,7 +28,6 @@ const BlogsListPage = () => {
             try {
                 const token = user && await user.getIdToken();
                 const headers = token ? { authtoken: token } : {};
-                console.log(`/api/blogs?page=${pagination.currentPage}&size=${pagination.pageSize}&sortBy=${sortBy}&sortDir=${sortDir}`);
                 const response = await axios.get(`/api/blogs?page=${pagination.currentPage}&size=${pagination.pageSize}&sortBy=${sortBy}&sortDir=${sortDir}`, { headers });
                 const blogsData = response.data.data;
                 setBlogs(blogsData);
@@ -53,17 +52,15 @@ const BlogsListPage = () => {
     
 
     const handleSortChange = (newSortBy) => {
-        // Update sort criteria based on pre-defined options
-        console.log(newSortBy);
         switch (newSortBy) {
             case 'lastUpdated':
                 setSortBy('updatedAt');
                 setSortDir('desc');
                 break;
-            // case 'mostArticles':
-            //     setSortBy('numberOfArticles');
-            //     setSortDir('desc');
-            //     break;
+            case 'mostArticles':
+                setSortBy('articleCount');
+                setSortDir('desc');
+                break;
             case 'createdFirst':
                 setSortBy('createdAt');
                 setSortDir('asc');
@@ -96,15 +93,17 @@ const BlogsListPage = () => {
             <select
                 id="sortBy"
                 value={
-                    sortBy === 'createdAt' ? 'createdFirst' :
-                    sortBy === 'updatedAt' ? 'lastUpdated' : ''
-                  }
+                    sortBy === 'updatedAt' ? 'lastUpdated' :
+                    sortBy === 'createdAt' && sortDir === 'asc' ? 'createdFirst' :
+                    sortBy === 'createdAt' && sortDir === 'desc' ? 'createdLast' :
+                    sortBy === 'articleCount' ? 'mostArticles' : ''
+                }
                 onChange={(e) => handleSortChange(e.target.value)}
             >
+            <option value="lastUpdated">Last Updated</option>
             <option value="createdFirst">Created First</option>
             <option value="createdLast">Newest First</option>
-            <option value="lastUpdated">Last Updated</option>
-            {/* <option value="mostArticles">Most Articles</option> */}
+            <option value="mostArticles">Most Articles</option>
             </select>
             
             <BlogsList blogs={blogs} />
