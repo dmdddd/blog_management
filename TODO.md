@@ -1,9 +1,13 @@
 # TODO
+These is a list of all the frontend todo tasks
+- [ ] Add email verification info and option to UpdateProfilePage
+
+---
+Previous:
 - [x] Add profile update page, letting users update display name
 - [x] Retrieve articles from database, instead of the JSON, in ArticlePage
 - [x] Create api call to retrieve all articles
 - [x] Separate comments from articles by moving them to a different collection, support displaying and adding new ones
-- [ ] Add email verification info and option to UpdateProfilePage
 - [x] Add comment deletetion button in the comments list
   - [x] Create a delete button in FE
   - [x] Protect FE: Make sure the delete button is only visible to the owner of the comment
@@ -17,11 +21,6 @@
   - [x] FE: Add icons to the comment box
   - [x] FE: Add icon URL to the comments in MongoDB
   - [x] FE & BE: Update icon URLs in all of the users' comments when updating profile information
-- [ ] Add upvote to comments
 - [x] Allow users edit their comments
   - [x] FE: add a new component to edit text
   - [x] BE: add API to edit coment text
-- [ ] BE: add article creation endpoint
-
- BUGS:
- Editing article does not update global state
